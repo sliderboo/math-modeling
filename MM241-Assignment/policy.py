@@ -83,11 +83,11 @@ class GreedyPolicy(Policy):
         for prod in list_prods:
             if prod["quantity"] > 0:
                 prod_size = prod["size"]
+                prod_w, prod_h = prod_size
 
                 # Loop through all stocks
                 for i, stock in enumerate(observation["stocks"]):
                     stock_w, stock_h = self._get_stock_size_(stock)
-                    prod_w, prod_h = prod_size
 
                     if stock_w < prod_w or stock_h < prod_h:
                         continue
@@ -261,45 +261,47 @@ class FirstFitPolicy(Policy):
 
 class WorstFitPolicy(Policy):
     def __init__(self):
-        pass
+        self.list_prods = []
+        self.stocks = []
+        self.original_stocks = []
 
     def get_action(self, observation, info):
-        list_prods = observation["products"]
-        stocks = observation["stocks"]
+        # Store products and stocks to self attributes
+        self.list_prods = observation["products"]
+        self.stocks = observation["stocks"]
+        self.original_stocks = list(enumerate(self.stocks))
 
-        prod_size = [0, 0]
-        stock_idx = -1
-        pos_x, pos_y = 0, 0
-        max_space = float('-inf')
-        worst_action = None
+        # Sort products and stocks by height * width in decreasing order
+        self.list_prods = sorted(self.list_prods, key=lambda p: p["size"][0] * p["size"][1], reverse=True)
+        self.stocks = sorted(self.original_stocks, key=lambda s: self._get_stock_size_(s[1])[0] * self._get_stock_size_(s[1])[1], reverse=True)
 
-        # Iterate over all products to find the one with the highest demand
-        sorted_prods = sorted(list_prods, key=lambda p: p["quantity"], reverse=True)
-        for prod in sorted_prods:
-            if prod["quantity"] > 0:
-                prod_size = prod["size"]
-                prod_w, prod_h = prod_size
+        # Debug print to verify sorting
+        # print(str(self.list_prods))
+        # print(str(self.stocks))
 
-                # Iterate over all stocks to find the position that leaves the most space
-                for idx, stock in enumerate(stocks):
-                    stock_w, stock_h = self._get_stock_size_(stock)
+        # Iterate over all stocks from largest to smallest
+        for sorted_idx, (original_idx, stock) in enumerate(self.stocks):
+            stock_w, stock_h = self._get_stock_size_(stock)
+            
+            # Iterate over all products sorted by size to fill the current stock
+            for prod in self.list_prods:
+                if prod["quantity"] > 0:
+                    prod_size = prod["size"]
+                    prod_w, prod_h = prod_size
+
+                    # Skip the current stock if it's not large enough for the product
+                    if stock_w < prod_w or stock_h < prod_h:
+                        continue
 
                     # Iterate through possible positions row by row
-                    for y in range(stock_h - prod_h + 1):
-                        for x in range(stock_w - prod_w + 1):
+                    for x in range(stock_w - prod_w + 1):
+                        for y in range(stock_h - prod_h + 1):
                             if self._can_place_(stock, (x, y), prod_size):
-                                remaining_width = stock_w - (x + prod_w)
-                                remaining_height = stock_h - (y + prod_h)
-                                space_left = remaining_width * remaining_height
+                                return {"stock_idx": original_idx, "size": prod_size, "position": (x, y)}
 
-                                if space_left > max_space:
-                                    max_space = space_left
-                                    worst_action = {"stock_idx": idx, "size": prod_size, "position": (x, y)}
+        # If no valid placement found, return default action
+        return {"stock_idx": -1, "size": [0, 0], "position": (0, 0)}
 
-        if worst_action:
-            return worst_action
-
-        return {"stock_idx": stock_idx, "size": prod_size, "position": (pos_x, pos_y)}
 
 class DCGPolicy(Policy):
     def __init__(self):

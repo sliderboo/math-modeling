@@ -198,8 +198,8 @@ def ExactLinearPolicyTest():
             ep += 1
 
 if __name__ == "__main__":
-# 
-    greedy_test = GreedyPolicyTest()
+
+    # greedy_test = GreedyPolicyTest()
 
     # greedy2_test = GreedyPolicy2Test()
 
@@ -215,10 +215,11 @@ if __name__ == "__main__":
 
     # ff_test = FirstFitPolicyTest()
 
-    # wf_test = WorstFitPolicyTest()
+    wf_test = WorstFitPolicyTest()
 
     # nfd_test = NextFitDecreasingPolicyTest()
 
     # el_test = ExactLinearPolicyTest()
+
 
 env.close()
