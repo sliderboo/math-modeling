@@ -1,6 +1,6 @@
 import gym_cutting_stock
 import gymnasium as gym
-from policy import GreedyPolicy, RandomPolicy, DCGPolicy, LPPolicy, CBCPolicy, GreedyPolicy2, BestFitPolicy, FirstFitPolicy, WorstFitPolicy, NextFitDecreasingPolicy, ExactLinearPolicy
+from policy import GreedyPolicy, RandomPolicy, DCGPolicy, LPPolicy, CBCPolicy, GreedyPolicy2, BestFitPolicy, FirstFitPolicy, WorstFitPolicy, NextFitDecreasingPolicy, ExactLinearPolicy, BieuPolicy
 from time import sleep
 # from student_submissions.s2210xxx.policy2352237 import Policy2352237
 
@@ -157,6 +157,8 @@ def WorstFitPolicyTest():
     ep = 0
     while ep < NUM_EPISODES:
         action = wf_policy.get_action(observation, info)
+        # print ([(prod["size"][0], prod["size"][1], prod["quantity"]) for prod in wf_policy.list_prods])
+        # print ([wf_policy._get_stock_size_(stock) for stock in observation["stocks"]])
         print(action)
         observation, reward, terminated, truncated, info = env.step(action) 
 
@@ -197,6 +199,22 @@ def ExactLinearPolicyTest():
             observation, info = env.reset(seed=ep)
             ep += 1
 
+def BieuPolicyTest():
+    observation, info = env.reset(seed=42)
+    
+    # Test GreedyPolicy
+    bieu_policy = BieuPolicy()
+    ep = 0
+    while ep < NUM_EPISODES:
+        action = bieu_policy.get_action(observation, info)
+        print(action)
+        observation, reward, terminated, truncated, info = env.step(action) 
+
+        if terminated or truncated:
+            sleep(300)
+            observation, info = env.reset(seed=ep)
+            ep += 1
+
 if __name__ == "__main__":
 
     # greedy_test = GreedyPolicyTest()
@@ -220,6 +238,8 @@ if __name__ == "__main__":
     # nfd_test = NextFitDecreasingPolicyTest()
 
     # el_test = ExactLinearPolicyTest()
+
+    # bieu_test = BieuPolicyTest()
 
 
 env.close()
