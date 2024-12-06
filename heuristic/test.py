@@ -1,7 +1,6 @@
 import random
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-
 class Product:
     def __init__(self, width, height):
         self.width = width
@@ -216,6 +215,7 @@ def place_products_across_stocks(stocks, products):
             
         # Evaluate performance for the current stock
         evaluate_performance(current_stock)
+        visualize_stock(current_stock)
 
 def place_products_with_preprocess(stocks, products):
     """Alternative placement strategy with preprocessing and better distribution"""
@@ -266,67 +266,36 @@ def place_products_with_preprocess(stocks, products):
             # Remove placed products
             for product in products_to_remove:
                 unplaced_products.remove(product)
-                
-        evaluate_performance(stock)
-    
+        visualize_stock(stock)   
+        
     if unplaced_products:
         print(f"Warning: Could not place {len(unplaced_products)} remaining products")
         
-def visualize_all_stocks(stocks):
-    """Visualize all stocks in a single figure using subplots"""
-    # Calculate the grid dimensions
-    n_stocks = len(stocks)
-    n_cols = 3  # We'll use 3 columns
-    n_rows = (n_stocks + n_cols - 1) // n_cols  # Ceiling division for number of rows
-    
-    # Create figure with subplots
-    fig, axs = plt.subplots(n_rows, n_cols, figsize=(15, 5*n_rows))
-    fig.suptitle('Stock Cutting Solutions', fontsize=16)
-    
-    # Flatten axs if it's 2D
-    if n_rows > 1:
-        axs = axs.flatten()
-    elif n_rows == 1:
-        axs = [axs] if n_stocks == 1 else axs
-    
-    # Plot each stock
-    for idx, stock in enumerate(stocks):
-        ax = axs[idx]
+def generate_random_color():
+    """Generate a random color in RGB format."""
+    return (random.random(), random.random(), random.random())
+
+def visualize_stock(stock):
+    # Create a new figure
+    fig, ax = plt.subplots()
+
+    # Add the main stock area as a rectangle (consider stock.width and stock.height)
+    ax.add_patch(patches.Rectangle((0, 0), stock.width, stock.height, linewidth=1, edgecolor='black', facecolor='white'))
+
+    # Plot the placed products in the stock with random colors
+    for product in stock.placed_products:
+        # Create a random color for each product
+        color = generate_random_color()
+        x, y, width, height = product
+        ax.add_patch(patches.Rectangle((x, y), width, height, linewidth=1, edgecolor='black', facecolor=color))
         
-        # Set the limits for the current subplot
-        ax.set_xlim(0, stock.width)
-        ax.set_ylim(0, stock.height)
-        
-        # Add title with utilization percentage
-        ax.set_title(f'Stock {stock.stock_id}\n')
-        
-        # Plot each placed product
-        for x, y, width, height in stock.placed_products:
-            rect = patches.Rectangle(
-                (x, y), width, height,
-                linewidth=1,
-                edgecolor='black',
-                facecolor='blue',
-                alpha=0.5
-            )
-            ax.add_patch(rect)
-        
-        # Add grid
-        ax.grid(True, linestyle='--', alpha=0.6)
-        
-        # Set aspect ratio to equal
-        ax.set_aspect('equal', adjustable='box')
-        
-        # Add labels
-        ax.set_xlabel('Width')
-        ax.set_ylabel('Height')
-    
-    # Remove empty subplots if any
-    for idx in range(len(stocks), len(axs)):
-        fig.delaxes(axs[idx])
-    
-    # Adjust layout to prevent overlap
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    # Set limits and labels
+    ax.set_xlim(0, stock.width)
+    ax.set_ylim(0, stock.height)
+    ax.set_xlabel('Width')
+    ax.set_ylabel('Height')
+
+    plt.gca().set_aspect('equal', adjustable='box')
     plt.show()
 
 
