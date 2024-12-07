@@ -1,7 +1,8 @@
 import random
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-
+import numpy as np
+from collections import deque
 class Solution:
     class Product:
         def __init__(self, width, height):
@@ -150,25 +151,9 @@ class Solution:
                     j += 1
                 i += 1
 
-
-    @staticmethod
-    def generate_random_stock(stock_id):
-        """Generate a random stock with a random width and height."""
-        width = random.randint(30, 50)
-        height = random.randint(30, 50)
-        return Solution.Stock(stock_id, width, height)
-
-    @staticmethod
-    def generate_random_product():
-        """Generate a random product with random width and height."""
-        width = random.randint(5, 11)
-        height = random.randint(5, 7)
-        return Solution.Product(width, height)
-
     @staticmethod
     def place_products_across_stocks(stocks, products):
         """Improved placement strategy to maximize utilization across all stocks"""
-        result = []
         # Sort products by area in descending order
         products = sorted(products, key=lambda p: p.area, reverse=True)
         unplaced_products = products.copy()
@@ -201,41 +186,59 @@ class Solution:
             if not products_to_remove:
                 print(f"Warning: Could not place {len(unplaced_products)} remaining products")
                 break
-
+            # total_area = current_stock.width * current_stock.height
+            # if total_area > 0:
+            #     filled_area = sum([p[2] * p[3] for p in current_stock.placed_products])
+            #     filled_percentage = (filled_area / total_area) * 100
+            #     print(f"Stock {current_stock.stock_id}: Filled area = {filled_percentage:.2f}%")
+            # else:
+            #     print(f"Stock {current_stock.stock_id}: Invalid total area (0), cannot evaluate performance.")
     @staticmethod
-    def generate_random_color():
-        """Generate a random color in RGB format."""
-        return (random.random(), random.random(), random.random())
+    def get_action(observation,info):
+        input_prods = []
+        input_stocks = []
+        products = observation["products"]
+        for prod in products:
+            if prod["quantity"] > 0:
+                prod_size = prod["size"]
+                prod_w, prod_h = prod_size
+                new_product = Solution.Product(prod_w, prod_h)
+                for _ in range(prod["quantity"]):
+                    input_prods.append(new_product)
 
-    @staticmethod
-    def visualize_stock(stock):
-        # Create a new figure
-        fig, ax = plt.subplots()
+        stocks = observation["stocks"]
+        def _get_stock_size_(stock):
+            stock_w = np.sum(np.any(stock != -2, axis=1))
+            stock_h = np.sum(np.any(stock != -2, axis=0))
+            return stock_w, stock_h
 
-        # Add the main stock area as a rectangle (consider stock.width and stock.height)
-        ax.add_patch(patches.Rectangle((0, 0), stock.width, stock.height, linewidth=1, edgecolor='black', facecolor='lightgray'))
+        stock_id = 0
+        for stock in stocks:
+            stock_w, stock_h = _get_stock_size_(stock)
+            new_stock = Solution.Stock(stock_id, stock_w, stock_h)
+            stock_id += 1
+            input_stocks.append(new_stock)
 
-        # Plot the placed products in the stock with random colors
-        for product in stock.placed_products:
-            # Create a random color for each product
-            color = Solution.generate_random_color()
-            x, y, width, height = product
-            ax.add_patch(patches.Rectangle((x, y), width, height, linewidth=1, edgecolor='black', facecolor=color))
+        # Place products across stocks
+        Solution.place_products_across_stocks(input_stocks, input_prods)
+        result = []
+        for stock_idx, stock in enumerate(input_stocks):
+            # Iterate over the placed products in the current stock
+            for product in stock.placed_products:
+                pos_x, pos_y, prod_width, prod_height = product
+                result.append({
+                    "stock_idx": stock_idx,  # Index of the current stock
+                    "size": (prod_width, prod_height), 
+                    "position": (pos_x, pos_y)
+                })
 
-        # Set limits and labels
-        ax.set_xlim(0, stock.width)
-        ax.set_ylim(0, stock.height)
-        ax.set_xlabel('Width')
-        ax.set_ylabel('Height')
+        for placement in result:
+            action = {
+                "stock_idx": placement["stock_idx"],
+                "size": placement["size"],
+                "position": placement["position"]
+            }
 
-        # Set aspect ratio to ensure square units
-        plt.gca().set_aspect('equal', adjustable='box')
+        return action
 
-        # Title
-        ax.set_title(f"Stock {stock.stock_id}: Utilization = {sum([p[2]*p[3] for p in stock.placed_products]) / (stock.width * stock.height) * 100:.2f}%")
-
-        # Show the plot
-        plt.show()
-        plt.close()
-
-
+    
