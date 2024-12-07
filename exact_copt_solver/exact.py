@@ -87,7 +87,7 @@ class CSPExactSolver:
         least_required_stocks = np.ceil(total_prods_area / stocks_area)
         print(f"Total demand area: {total_prods_area}")
         print(f"Total stock area: {stocks_area}")
-        print(f"Least required sttocks: {least_required_stocks}")
+        print(f"Least required stocks: {least_required_stocks}")
 
         n = len(prods)  # number of rectangular items
         p = [prod[0] for prod in prods]  # widths of the items
@@ -105,7 +105,6 @@ class CSPExactSolver:
 
         used_materials = prob.addVars(m, vtype=COPT.BINARY, nameprefix="used_material")
         prob.setObjective(cp.quicksum(used_materials[k] * X[k] * Y[k] for k in range(m)), sense=COPT.MINIMIZE)
-        # prob.setObjective(cp.quicksum(used_materials[k] for k in range(m)), sense=COPT.MINIMIZE)
 
         for i in range(n):
             prob.addConstr(cp.quicksum(material[i][k] for k in range(m)) == 1, name=f"Material_assignment_{i}")

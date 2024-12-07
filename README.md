@@ -1,46 +1,83 @@
-# Mathematical Modelling - Fall 2024
+# 2D Cutting Stock Problem Solver
 
-## Assignment: Cutting Stock Problem
-<!-- Describe cutting stock problem -->
-Cuttin Stock Problem is a combinatorial optimization problem that arises in many industrial applications. The problem consists of cutting stocks of material into smaller pieces in order to meet the demand for smaller pieces. The objective is to minimize the number of stocks used to meet the demand for smaller pieces. The problem is NP-hard and can be solved using integer programming techniques.
+This repository provides an implementation of an exact method to solve the **2D Cutting Stock Problem (CSP)** using Mixed-Integer Programming (MIP). The goal is to minimize material waste by efficiently placing rectangular items on stock sheets while satisfying all placement and demand constraints.
 
-Below is a demonstration of greedy algorithm for cutting stock problem.
-<!-- Show gif file named demo/greedy.gif -->
-![Greedy Algorithm](demo/greedy.gif)
+## Features
+- **Exact Solver**: Implements a Mixed-Integer Linear Programming (MILP) approach using the [COPT](https://www.copt.ai/) solver.
+- **Visualization**: Generates graphical layouts of the cutting patterns for better insight into the solution.
+- **Flexible Input Handling**:
+  - Supports input files specifying stock and product dimensions.
+  - Can generate random test data for quick experimentation.
+- **Output Storage**: Saves results and visualizations in a designated output folder.
+
+## Requirements
+To use this repository, you will need:
+- Python 3.8+
+- Required Python packages:
+  - `coptpy`
+  - `numpy`
+  - `matplotlib`
+  - `argparse`
 
 ## Installation
-<!-- Describe how to install the project -->
-To install the project, you need to have Python installed on your machine. You can install Python from the official website. Once you have Python installed, you can clone the repository and run the following command to install the required packages:
-```bash
-pip install -r requirements.txt
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/sliderboo/math-modeling.git
+   cd math-modeling
+   ```
+2. Install the required Python packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+   (Ensure that `coptpy` is installed and properly licensed.)
 
 ## Usage
-<!-- Describe how to use the project -->
-To use the project, you need to run the following command:
-```bash
-python main.py
-```
+The solver can be run with either custom input files or randomly generated data.
 
-## How to implement your own policy
-<!-- Describe how to implement your own policy -->
-To implement your own policy, you need to create a new class that inherits from the `Policy` class and implement the `get_action` method. The `get_action` method should take a list of demands and a list of stock as input and return a dictionary that contains action information. The action information should include the size of demand, stock index, and position to cut the stock. You should also implement the `__init__` method to initialize the policy with any required parameters. Please refer to the `RandomPolicy` class in the `policy.py` file for an example implementation.
+### Command-Line Arguments
+- `-r`: Generate random stock and product dimensions.
+- `-m`: Number of stock sheets to generate (default: 5).
+- `-n`: Number of rectangular items to generate (default: 10).
+- `-f`: Path to an input file containing stock and product dimensions.
+- `-o`: Output folder to save results (default: `output`).
 
-You can start by creating a new file in the `student_submissions` directory and implementing your policy in `s22110xxx` folder. Your code should be named `policy2210xxx.py` where `2210xxx` is your student ID. The policy class should be named `Policy2210xxx` where `2210xxx` is your student ID and inherit from the `Policy` class. You can have some support files in `s22110xxx` folder. If you are in honor class, you must implement reinforcement learning policy. Once you have implemented your policy, you can run uncomment the line in the `main.py` file that imports your policy and run the project to test your policy. You can only use basic python libraries such as numpy, pandas, torch, tensorflow, scikit-learn and scipy to implement your policy. Please put the new library in the `requirements.txt` file.  
+### Examples
+1. **Run with Random Data**:
+   ```bash
+   python solver.py -r -m 5 -n 10 -o output_folder
+   ```
 
-After you complete your policy, you need to submit your code as a pull request to the main repository. The pull request should include the following information:
-- Title: Your student ID
-- A brief description of your policy
-- The implementation of your policy
-- The results of your policy on the test data
-- Any additional information you would like to include
+2. **Run with Input File**:
+   Prepare an input file, e.g., `input.txt`:
+   ```python
+   init_stocks = [(30, 40, 2), (50, 60, 1)]
+   init_prods = [(10, 15, 4), (20, 10, 3), (25, 30, 2)]
+   ```
+   Run the solver:
+   ```bash
+   python solver.py -f input.txt -o output_folder
+   ```
 
-Any solutions that are not submitted as a pull request or do not follow the above guidelines will not be accepted. If you have any questions or need help implementing your policy, please post a message in the discussion forum.
+## Output
+- **Visualization**: A `.png` file illustrating the cutting layout for each stock sheet.
+- **Details**: A log of material usage, waste, and fill percentage.
+
+## Implementation Details
+The solver leverages COPT for MIP optimization and includes:
+- **Decision Variables**: Positions, orientations, material assignments, and non-overlap conditions for each item.
+- **Constraints**: Ensure valid placement, non-overlapping items, and satisfaction of demand.
+- **Objective Function**: Minimize the total material used or waste area.
+
+For detailed information, refer to the `Implementation` section in the documentation.
+
+## Repository Structure
+- `solver.py`: Main script to run the solver.
+- `visualization.py`: Generates cutting layouts.
+- `README.md`: This documentation file.
+- `requirements.txt`: Dependencies for the project.
 
 ## Contributing
-<!-- Describe how to contribute to the project -->
-To contribute to the project, you need to fork the repository and create a new branch. Once you have made your changes, you can create a pull request to merge your changes into the main branch.
+Contributions are welcome! Please open an issue or submit a pull request for suggestions and improvements.
 
 ## License
-<!-- Describe the license under which the project is distributed -->
-This project is distributed under the MIT License. See `LICENSE` for more information.
+This project is licensed under the MIT License. See `LICENSE` for details.
