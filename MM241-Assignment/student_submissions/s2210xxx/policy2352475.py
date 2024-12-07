@@ -4,6 +4,10 @@ import matplotlib.patches as patches
 import numpy as np
 from collections import deque
 class Solution:
+    def __init__(self):
+        self.isSolved= False
+        self.result=[]
+        self.it=0
     class Product:
         def __init__(self, width, height):
             self.width = width
@@ -186,59 +190,59 @@ class Solution:
             if not products_to_remove:
                 print(f"Warning: Could not place {len(unplaced_products)} remaining products")
                 break
-            # total_area = current_stock.width * current_stock.height
-            # if total_area > 0:
-            #     filled_area = sum([p[2] * p[3] for p in current_stock.placed_products])
-            #     filled_percentage = (filled_area / total_area) * 100
-            #     print(f"Stock {current_stock.stock_id}: Filled area = {filled_percentage:.2f}%")
-            # else:
-            #     print(f"Stock {current_stock.stock_id}: Invalid total area (0), cannot evaluate performance.")
-    @staticmethod
-    def get_action(observation,info):
-        input_prods = []
-        input_stocks = []
-        products = observation["products"]
-        for prod in products:
-            if prod["quantity"] > 0:
-                prod_size = prod["size"]
-                prod_w, prod_h = prod_size
-                new_product = Solution.Product(prod_w, prod_h)
-                for _ in range(prod["quantity"]):
-                    input_prods.append(new_product)
-
-        stocks = observation["stocks"]
-        def _get_stock_size_(stock):
-            stock_w = np.sum(np.any(stock != -2, axis=1))
-            stock_h = np.sum(np.any(stock != -2, axis=0))
-            return stock_w, stock_h
-
-        stock_id = 0
-        for stock in stocks:
-            stock_w, stock_h = _get_stock_size_(stock)
-            new_stock = Solution.Stock(stock_id, stock_w, stock_h)
-            stock_id += 1
-            input_stocks.append(new_stock)
-
+            total_area = current_stock.width * current_stock.height
+            if total_area > 0:
+                filled_area = sum([p[2] * p[3] for p in current_stock.placed_products])
+                filled_percentage = (filled_area / total_area) * 100
+                print(f"Stock {current_stock.stock_id}: Filled area = {filled_percentage:.2f}%")
+            else:
+                print(f"Stock {current_stock.stock_id}: Invalid total area (0), cannot evaluate performance.")
+    def get_action(self,observation,info):
         # Place products across stocks
-        Solution.place_products_across_stocks(input_stocks, input_prods)
-        result = []
-        for stock_idx, stock in enumerate(input_stocks):
-            # Iterate over the placed products in the current stock
-            for product in stock.placed_products:
-                pos_x, pos_y, prod_width, prod_height = product
-                result.append({
-                    "stock_idx": stock_idx,  # Index of the current stock
-                    "size": (prod_width, prod_height), 
-                    "position": (pos_x, pos_y)
-                })
+        if self.it >= len(self.result):
+            self.isSolved=False
+            self.it=0
+            self.result=[]
+        if not self.isSolved:
+            input_prods = []
+            input_stocks = []
+            products = observation["products"]
+            for prod in products:
+                if prod["quantity"] > 0:
+                    prod_size = prod["size"]
+                    prod_w, prod_h = prod_size
+                    new_product = Solution.Product(prod_w, prod_h)
+                    for _ in range(prod["quantity"]):
+                        input_prods.append(new_product)
 
-        for placement in result:
-            action = {
-                "stock_idx": placement["stock_idx"],
-                "size": placement["size"],
-                "position": placement["position"]
-            }
+            stocks = observation["stocks"]
+            def _get_stock_size_(stock):
+                stock_w = np.sum(np.any(stock != -2, axis=1))
+                stock_h = np.sum(np.any(stock != -2, axis=0))
+                return stock_w, stock_h
 
+            stock_id = 0
+            for stock in stocks:
+                stock_w, stock_h = _get_stock_size_(stock)
+                new_stock = Solution.Stock(stock_id, stock_w, stock_h)
+                stock_id += 1
+                input_stocks.append(new_stock)
+            Solution.place_products_across_stocks(input_stocks, input_prods)
+            self.isSolved=True 
+            for stock_idx, stock in enumerate(input_stocks):
+                # Iterate over the placed products in the current stock
+                for product in stock.placed_products:
+                    pos_x, pos_y, prod_width, prod_height = product
+                    self.result.append({
+                        "stock_idx": stock_idx,  # Index of the current stock
+                        "size": (prod_width, prod_height), 
+                        "position": (pos_x, pos_y)
+                    })
+        action = {
+            "stock_idx": self.result[self.it]["stock_idx"],
+            "size": self.result[self.it]["size"],
+            "position": self.result[self.it]["position"]
+        }
+        self.it+=1
         return action
-
-    
+          

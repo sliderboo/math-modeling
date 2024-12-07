@@ -2,8 +2,6 @@ import gym_cutting_stock
 import gymnasium as gym
 from policy import GreedyPolicy
 from student_submissions.s2210xxx.policy2210xxx import Policy2210xxx
-from time import sleep
-import numpy as np
 # from student_submissions.s2210xxx.policy2352237 import Policy2352237
 from student_submissions.s2210xxx.policy2352475 import Solution
 
@@ -23,7 +21,7 @@ def GuillotineTest():
     while ep < NUM_EPISODES:
         # Perform the step with the action
         action = solution.get_action(observation, info)
-        print(action)
+        #print(action)
         # print(info)
         observation, reward, terminated, truncated, info = env.step(action)
         if terminated or truncated:
