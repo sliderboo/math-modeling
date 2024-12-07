@@ -1,4 +1,4 @@
-from policy_init import Policy
+from policy import Policy
 import numpy as np
 
 

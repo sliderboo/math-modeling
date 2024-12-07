@@ -56,9 +56,9 @@ The solver can be run with either custom input files or randomly generated data.
    ```
 
 ## Output
-- **Initial testcase**: An `input.txt` file of the input
+- **Initial testcase**: An `input.txt` file of the input.
 - **Visualization**: A `visualization.png` file illustrating the cutting layout for each stock sheet.
-- **Details**: A log of material usage, waste, and fill percentage.
+- **Result**: An `output.txt` file of the output.
 
 ## Implementation Details
 The solver leverages COPT for MIP optimization and includes:

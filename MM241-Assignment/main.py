@@ -23,6 +23,7 @@ if __name__ == "__main__":
     while ep < NUM_EPISODES:
         action = gd_policy.get_action(observation, info)
         print(action)
+        print(info)
         observation, reward, terminated, truncated, info = env.step(action)
 
         if terminated or truncated:

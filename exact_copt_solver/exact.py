@@ -27,6 +27,15 @@ class CSPExactSolver:
         
         write_input_data(self)
 
+    def _get_info(self, cutted_stocks, stocks):
+        filled_ratio = np.mean(cutted_stocks).item()
+        trim_loss = []
+
+        for i in range(len(cutted_stocks)):
+            trim_loss.append(1 - cutted_stocks[i])
+
+        return {"filled_ratio": filled_ratio, "trim_loss": trim_loss}
+
     def visualize(self, prods, stocks, x, y, s, material, m):
         fig, axes = plt.subplots(m, 1, figsize=(5, m * 7))  # Adjust size for vertical layout
         if m == 1:
@@ -133,8 +142,11 @@ class CSPExactSolver:
         prob.solve()
 
         if prob.status == 1:  # Optimal solution  found
+            solve_time = prob.getAttr(COPT.Attr.SolvingTime) 
+
             used_materials = [0] * m
             total_used_area = [0] * m
+            cutted_stocks = []
 
             for i in range(n):
                 w = prods[i][0] if round(s[i].x) == 1 else prods[i][1]
@@ -149,13 +161,22 @@ class CSPExactSolver:
                 if used_materials[k] == 1:
                     total_material_area = X[k] * Y[k]
                     total_waste += total_material_area - total_used_area[k]
+                    cutted_stocks.append(total_used_area[k] / total_material_area)
                     print(f"""[+] Material {k}: 
         [-] Total area = {total_material_area}
         [-] Used area = {total_used_area[k]}
         [-] Waste area = {X[k] * Y[k] - total_used_area[k]}
         [-] Fill percentage: {round(total_used_area[k] / (total_used_area[k] + X[k] * Y[k] - total_used_area[k]) * 100, 2)}%""")
 
-            # Visualization
+            info = self._get_info(cutted_stocks, stocks)
+            output_file = os.path.join(self.output_folder, "output.txt")
+            with open(output_file, "w") as f:
+                f.write(f"Number of stocks used: {total_materials_used}\n")
+                f.write(f"Filled ratio: {info['filled_ratio']:.2f}\n")
+                f.write(f"Trim loss: {', '.join(f'{loss:.2f}' for loss in info['trim_loss'])}\n")
+                f.write(f"Solve Time: {solve_time:.2f}\n")
+
+
             self.visualize(prods, stocks, x, y, s, material, m)
             return
     
