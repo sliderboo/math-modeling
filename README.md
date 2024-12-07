@@ -23,12 +23,9 @@ To use this repository, you will need:
 1. Clone the repository:
    ```bash
    git clone https://github.com/sliderboo/math-modeling.git
-   cd math-modeling
+   cd math-modeling/exact_copt_solver
    ```
-2. Install the required Python packages:
-   ```bash
-   pip install -r requirements.txt
-   ```
+2. Install the required Python packages mentioned above.
    (Ensure that `coptpy` is installed and properly licensed.)
 
 ## Usage
@@ -59,7 +56,8 @@ The solver can be run with either custom input files or randomly generated data.
    ```
 
 ## Output
-- **Visualization**: A `.png` file illustrating the cutting layout for each stock sheet.
+- **Initial testcase**: An `input.txt` file of the input
+- **Visualization**: A `visualization.png` file illustrating the cutting layout for each stock sheet.
 - **Details**: A log of material usage, waste, and fill percentage.
 
 ## Implementation Details
@@ -69,15 +67,7 @@ The solver leverages COPT for MIP optimization and includes:
 - **Objective Function**: Minimize the total material used or waste area.
 
 For detailed information, refer to the `Implementation` section in the documentation.
-
-## Repository Structure
-- `solver.py`: Main script to run the solver.
-- `visualization.py`: Generates cutting layouts.
-- `README.md`: This documentation file.
-- `requirements.txt`: Dependencies for the project.
-
-## Contributing
-Contributions are welcome! Please open an issue or submit a pull request for suggestions and improvements.
+[2D Cutting Stock Problem Report](https://www.papeeria.com/p/189cdd6765138e330b84adc9389d36e6#/report.tex)
 
 ## License
 This project is licensed under the MIT License. See `LICENSE` for details.
