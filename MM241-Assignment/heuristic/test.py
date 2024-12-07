@@ -1,6 +1,12 @@
 import random
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import gym_cutting_stock
+from abc import abstractmethod
+import gymnasium as gym
+import numpy as np
+
+
 class Product:
     def __init__(self, width, height):
         self.width = width
@@ -46,7 +52,7 @@ class Stock:
             # Place the product in the best-fit area
             product.width, product.height = best_orientation
             self.placed_products.append((best_area.x, best_area.y, product.width, product.height))
-            
+
             # Update remaining areas
             self.remaining_areas.remove(best_area)
             new_areas = best_area.split_area(product)
@@ -161,25 +167,19 @@ class Area:
 
 def generate_random_stock(stock_id):
     """Generate a random stock with a random width and height."""
-    width = random.randint(1000, 5000)
-    height = random.randint(1000, 5000)
+    width = random.randint(30, 50)
+    height = random.randint(30, 50)
     return Stock(stock_id, width, height)
-
 def generate_random_product():
     """Generate a random product with random width and height."""
-    width = random.randint(100, 500)
-    height = random.randint(100, 500)
+    width = random.randint(5, 11)
+    height = random.randint(5, 7)
     return Product(width, height)
 
-def generate_products(prods):
-    products = []
-    for width, height, demand in prods:
-        for _ in range(demand):
-            products.append(Product(width, height))
-    return products
 
 def place_products_across_stocks(stocks, products):
     """Improved placement strategy to maximize utilization across all stocks"""
+    result=[]
     # Sort products by area in descending order
     products = sorted(products, key=lambda p: p.area, reverse=True)
     unplaced_products = products.copy()
@@ -215,62 +215,10 @@ def place_products_across_stocks(stocks, products):
             
         # Evaluate performance for the current stock
         evaluate_performance(current_stock)
-        visualize_stock(current_stock)
+        #print(current_stock.placed_products)
+        #visualize_stock(current_stock)
 
-def place_products_with_preprocess(stocks, products):
-    """Alternative placement strategy with preprocessing and better distribution"""
-    # Sort products by area in descending order
-    products = sorted(products, key=lambda p: p.area, reverse=True)
-    
-    # Calculate total area needed and available
-    total_product_area = sum(p.area for p in products)
-    total_stock_area = sum(s.width * s.height for s in stocks)
-    
-    print(f"Total product area: {total_product_area}")
-    print(f"Total stock area: {total_stock_area}")
-    print(f"Theoretical minimum utilization: {(total_product_area/total_stock_area)*100:.2f}%")
-    
-    # Estimate target utilization per stock
-    target_area_per_stock = total_product_area / len(stocks)
-    
-    # Group similar sized products together
-    products_by_size = {}
-    for product in products:
-        size_key = (product.width // 100, product.height // 100)  # Group by 100-unit intervals
-        if size_key not in products_by_size:
-            products_by_size[size_key] = []
-        products_by_size[size_key].append(product)
-    
-    unplaced_products = products.copy()
-    
-    for stock in stocks:
-        current_area = 0
-        products_to_remove = []
-        
-        # Try to fill each stock to its target utilization
-        while current_area < target_area_per_stock and unplaced_products:
-            best_fit = None
-            best_fit_waste = float('inf')
-            
-            # Find the best fitting product for current remaining space
-            for product in unplaced_products:
-                if stock.place_product(product):
-                    products_to_remove.append(product)
-                    current_area += product.area
-                    break
-            
-            # If we couldn't place any products, move to next stock
-            if not products_to_remove:
-                break
-                
-            # Remove placed products
-            for product in products_to_remove:
-                unplaced_products.remove(product)
-        visualize_stock(stock)   
-        
-    if unplaced_products:
-        print(f"Warning: Could not place {len(unplaced_products)} remaining products")
-        
+
 def generate_random_color():
     """Generate a random color in RGB format."""
     return (random.random(), random.random(), random.random())
@@ -280,7 +228,7 @@ def visualize_stock(stock):
     fig, ax = plt.subplots()
 
     # Add the main stock area as a rectangle (consider stock.width and stock.height)
-    ax.add_patch(patches.Rectangle((0, 0), stock.width, stock.height, linewidth=1, edgecolor='black', facecolor='white'))
+    ax.add_patch(patches.Rectangle((0, 0), stock.width, stock.height, linewidth=1, edgecolor='black', facecolor='lightgray'))
 
     # Plot the placed products in the stock with random colors
     for product in stock.placed_products:
@@ -288,15 +236,22 @@ def visualize_stock(stock):
         color = generate_random_color()
         x, y, width, height = product
         ax.add_patch(patches.Rectangle((x, y), width, height, linewidth=1, edgecolor='black', facecolor=color))
-        
+
     # Set limits and labels
     ax.set_xlim(0, stock.width)
     ax.set_ylim(0, stock.height)
     ax.set_xlabel('Width')
     ax.set_ylabel('Height')
 
+    # Set aspect ratio to ensure square units
     plt.gca().set_aspect('equal', adjustable='box')
+
+    # Title
+    ax.set_title(f"Stock {stock.stock_id}: Utilization = {sum([p[2]*p[3] for p in stock.placed_products]) / (stock.width * stock.height) * 100:.2f}%")
+
+    # Show the plot
     plt.show()
+    plt.close()
 
 
 def evaluate_performance(stock):
@@ -307,28 +262,64 @@ def evaluate_performance(stock):
 
 # Example Usage
 if __name__ == "__main__":
-    # Generate random stocks
-    # stocks = [Stock(stock_id=i+1, width=30, height=45) for i in range(10000)]
-    stocks = [generate_random_stock(stock_id=i) for i in range(1, 10000)]
-    # Generate random products
-#     prods = [
-#     (14, 13, 5),  # (width, height, demand)
-#     (8, 17, 3),
-#     (7, 15, 3),
-#     (9, 17, 4),
-#     (12, 7, 4),
-#     (12, 15, 2),
-#     (13, 14, 2),
-#     (15, 16, 3),
-#     (16, 17, 2),
-#     (17, 18, 1),
-#     (12,14, 1)
-# ]
-    
-    #products = generate_products(prods)
-    products = [generate_random_product() for _ in range(100000)]
+    # Initialize the environment
+    env = gym.make(
+        "gym_cutting_stock/CuttingStock-v0",
+        render_mode="human",  # Comment this line to disable rendering
+    )
+    observation, info = env.reset(seed=42)
+
+    # Prepare input data
+    input_prods = []
+    input_stocks = []
+
+    products = observation["products"]
+    for prod in products:
+        if prod["quantity"] > 0:
+            prod_size = prod["size"]
+            prod_w, prod_h = prod_size
+            new_product = Product(prod_w, prod_h)
+            for _ in range(prod["quantity"]):
+                input_prods.append(new_product)
+
+    stocks = observation["stocks"]
+    def _get_stock_size_(stock):
+        stock_w = np.sum(np.any(stock != -2, axis=1))
+        stock_h = np.sum(np.any(stock != -2, axis=0))
+        return stock_w, stock_h
+
+    stock_id = 0
+    for stock in stocks:
+        stock_w, stock_h = _get_stock_size_(stock)
+        new_stock = Stock(stock_id, stock_w, stock_h)
+        stock_id += 1
+        input_stocks.append(new_stock)
+
     # Place products across stocks
-    place_products_across_stocks(stocks, products)
+    place_products_across_stocks(input_stocks, input_prods)
+
+    result = []
+    for stock_idx, stock in enumerate(input_stocks):
+        # Iterate over the placed products in the current stock
+        for product in stock.placed_products:
+            pos_x, pos_y, prod_width, prod_height = product
+            result.append({
+                "stock_idx": stock_idx,  # Index of the current stock
+                "size": (prod_width, prod_height), 
+                "position": (pos_x, pos_y)
+            })
+
+    # Now interact with the environment for each product placement
+    for placement in result:
+        # Define action format based on how the environment expects the input
+        action = {
+            "stock_idx": placement["stock_idx"],
+            "size": placement["size"],
+            "position": placement["position"]
+        }
+        print(action)
+        # Perform the step with the action
+        observation, reward, done, truncated, info = env.step(action)
+        print(f"Step result: {observation}, Reward: {reward}")
+
     
-    # Visualize the solution
-    #visualize_all_stocks(stocks)
