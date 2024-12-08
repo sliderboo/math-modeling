@@ -1,0 +1,4 @@
+Number of stocks used: 2
+Filled ratio: 0.96, 0.91
+Trim loss: 0.04, 0.09
+Solve Time: 4.61
