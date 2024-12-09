@@ -187,16 +187,16 @@ class CSPExactSolver:
 
 
 def generate_data(n, m):
-    stocks = [(random.randint(20, 30), random.randint(20, 30), random.randint(1, 1)) for _ in range(m)]
+    stocks = [(random.randint(20, 20), random.randint(30, 30), random.randint(1, 1)) for _ in range(m)]
     prods = [(random.randint(5, 15), random.randint(5, 15), random.randint(1, 1)) for _ in range(n)]
     return stocks, prods
 
-def read_input_file(filename):
+def read_input_file(filename, m):
     if not os.path.exists(filename):
         sys.exit(f"File {filename} not found.")
     with open(filename, "r") as f:
         data = eval(f.read())
-    return data["init_stocks"], data["init_prods"]
+    return data["init_stocks"][:m], data["init_prods"]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="2D Cutting Stock Problem Solver")
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     if args.r and args.m and args.n:
         init_stocks, init_prods = generate_data(args.n, args.m)
     elif args.f:
-        init_stocks, init_prods = read_input_file(args.f)
+        init_stocks, init_prods = read_input_file(args.f, args.m)
     else:
         sys.exit("Invalid arguments. Use -r with -m and -n for random data or -f to specify an input file.")
 
