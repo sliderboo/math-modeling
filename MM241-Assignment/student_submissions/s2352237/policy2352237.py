@@ -1,8 +1,9 @@
 from policy import Policy
-
+import numpy as np
 
 class Policy2352237(Policy):
     def __init__(self):
+        self.result= {}
         self.height_areas = []
         self.current_stock = 0
         self.stock_inventory = []
@@ -71,13 +72,81 @@ class Policy2352237(Policy):
 
             self.update_height_area(prod, best_position, observation["stocks"][selected_stock], selected_stock)
             self.total_prod_area += prod["size"][0] * prod["size"][1]
+<<<<<<< HEAD
 
             action = {
+=======
+            action= {
+>>>>>>> a2fffc659b19343da633b53c87fde86494fb21a7
                 "stock_idx": selected_stock,
                 "size": prod["size"],
                 "position": best_position
             }
+<<<<<<< HEAD
             return action
+=======
+            if (action["stock_idx"], self._get_stock_size_(observation["stocks"][selected_stock])) not in self.result:
+                self.result[(action["stock_idx"], self._get_stock_size_(observation["stocks"][selected_stock]))] = 0
+            self.result[(action["stock_idx"], self._get_stock_size_(observation["stocks"][selected_stock]))] += (action["size"][0] * action["size"][1])
+            # print(str(self.result))
+            return action
+
+    def evaluate_performance(self):
+        filled_rat =[]
+        for key in self.result:
+            filled=self.result[key]*100 / (key[1][0]*key[1][1])
+            filled_rat.append(filled)
+        aggregated = {
+            "max_filled_area": np.max(filled_rat),
+            "min_filled_area": np.min(filled_rat),
+            "avg_filled_area": np.mean(filled_rat),
+            "total_use_stock": len(filled_rat),
+            # "avg_filled_area": np.mean([metrics["avg_filled_area"] for metrics in self.performance]),
+            # "max_time_to_solve": np.max([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
+            # "min_time_to_solve": np.min([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
+            # "avg_time_to_solve": np.mean([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
+            # "avg_trim_loss_percentage": np.mean(),
+            # "avg_unused_stock_count": np.mean([metrics["unused_stock_count"] for metrics in self.performance]),
+            # "total_trim_loss": np.sum([metrics["trim_loss"] for metrics in self.performance]),
+            # "total_unused_stocks": np.sum([metrics["unused_stock_count"] for metrics in self.performance]),
+        }
+        print(f"Max Filled Area: {aggregated['max_filled_area']:.2f}%")
+        print(f"Min Filled Area: {aggregated['min_filled_area']:.2f}%")
+        print(f"Avg Filled Area: {aggregated['avg_filled_area']:.2f}%")
+        # print(f"Avg Trim Loss Percentage: {aggregated['avg_trim_loss_percentage']:.2f}%")
+        print(f"Total Used Stock Count: {aggregated['total_use_stock']:.2f}")
+            
+    
+        
+    class HeightSegment:
+        def __init__(self, start_x, end_x, level):
+            self.start_x = start_x
+            self.end_x = end_x
+            self.level = level
+
+        def has_overlap(self, prod_size, position):
+            prod_start_x, prod_y = position
+            prod_width, prod_height = prod_size
+            prod_end_x = prod_start_x + prod_width
+
+            if prod_end_x <= self.start_x or prod_start_x >= self.end_x:
+                return False
+
+            if prod_y >= self.level:
+                return False
+
+            return True
+
+        def compute_gap_area(self, prod_size, position):
+            prod_start_x, prod_y = position
+            prod_width, prod_height = prod_size
+            prod_end_x = prod_start_x + prod_width
+
+            if prod_end_x <= self.start_x or prod_start_x >= self.end_x:
+                return 0
+
+            return (prod_y - self.level) * (min(prod_end_x, self.end_x) - max(prod_start_x, self.start_x))
+>>>>>>> a2fffc659b19343da633b53c87fde86494fb21a7
 
     def initialize_height_areas(self, stocks):
         self.height_areas = []
