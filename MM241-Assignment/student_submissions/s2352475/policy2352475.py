@@ -11,11 +11,7 @@ class Policy2352475:
             self.width = width
             self.height = height
             self.area = width * height  # Calculate the area of the product
-            self.is_balanced = self.is_balanced_product()
-
-        def is_balanced_product(self):
-            """Return True if the product is balanced (min(width, height)/max(width, height) > 0.8)"""
-            return min(self.width, self.height) / max(self.width, self.height) > 0.8
+            
     class Area:
         def __init__(self, x, y, width, height):
             self.x = x
