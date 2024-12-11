@@ -294,7 +294,7 @@ class Policy2352475(Policy):
         "time_to_solve": None,
         }
         return performance_metrics  
-    def aggregate_performance(self):
+    def print_performance(self):
         """
         Aggregate the performance metrics from all test cases and format the output.
 

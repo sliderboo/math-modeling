@@ -10,7 +10,7 @@ env = gym.make(
     "gym_cutting_stock/CuttingStock-v0",
     # render_mode="human",  # Comment this line to disable rendering
 )
-NUM_EPISODES = 1000
+NUM_EPISODES = 1
 
 def GuillotineTest():
     observation, info = env.reset(seed=42)
@@ -25,7 +25,7 @@ def GuillotineTest():
             observation, info = env.reset(seed=ep)
             # print(info)
             ep += 1
-    solution.aggregate_performance()
+    solution.print_performance()
 
 def SkylineTest():
     observation, info = env.reset(seed=42)
@@ -40,12 +40,12 @@ def SkylineTest():
             observation, info = env.reset(seed=ep)
             #print(info)
             ep += 1
-    solution.aggregate_performance()
+    solution.evaluate_performance()
     
 if __name__ == "__main__":
     # Reset the environment
-    test = GuillotineTest()
-    #test = SkylineTest()
+    # test = GuillotineTest()
+    test = SkylineTest()
         
 env.close()
 
