@@ -25,49 +25,6 @@ class Policy:
 
         return np.all(stock[pos_x : pos_x + prod_w, pos_y : pos_y + prod_h] == -1)
 
-class RandomPolicy(Policy):
-    def __init__(self):
-        pass
-
-    def get_action(self, observation, info):
-        list_prods = observation["products"]
-
-        prod_size = [0, 0]
-        stock_idx = -1
-        pos_x, pos_y = 0, 0
-
-        # Pick a product that has quality > 0
-        for prod in list_prods:
-            if prod["quantity"] > 0:
-                prod_size = prod["size"]
-
-                # Random choice a stock idx
-                pos_x, pos_y = None, None
-                for _ in range(100):
-                    # random choice a stock
-                    stock_idx = random.randint(0, len(observation["stocks"]) - 1)
-                    stock = observation["stocks"][stock_idx]
-
-                    # Random choice a position
-                    stock_w, stock_h = self._get_stock_size_(stock)
-                    prod_w, prod_h = prod_size
-
-                    if stock_w < prod_w or stock_h < prod_h:
-                        continue
-
-                    pos_x = random.randint(0, stock_w - prod_w)
-                    pos_y = random.randint(0, stock_h - prod_h)
-
-                    if not self._can_place_(stock, (pos_x, pos_y), prod_size):
-                        continue
-
-                    break
-
-                if pos_x is not None and pos_y is not None:
-                    break
-
-        return {"stock_idx": stock_idx, "size": prod_size, "position": (pos_x, pos_y)}
-
 class GreedyPolicy(Policy):
     def __init__(self):
         pass
@@ -1009,7 +966,51 @@ class BieuPolicy(Policy):
         # A lower trim loss means a better solution
         return remaining_area
     
+class MaxRectsBSSFPolicy(Policy):
+    def __init__(self):
+        pass
 
+    def get_action(self, observation, info):
+        list_prods = observation["products"]
+
+        # Find a product with quantity > 0
+        for prod in list_prods:
+            if prod["quantity"] > 0:
+                prod_size = prod["size"]
+                prod_w, prod_h = prod_size
+
+                # Loop through all stocks
+                best_stock_idx = -1
+                best_position = None
+                best_short_side_fit = float('inf')
+                
+                for i, stock in enumerate(observation["stocks"]):
+                    stock_w, stock_h = self._get_stock_size_(stock)
+                    
+                    if stock_w < prod_w or stock_h < prod_h:
+                        continue
+
+                    # Try to place the product in each possible position
+                    for x in range(stock_w - prod_w + 1):
+                        for y in range(stock_h - prod_h + 1):
+                            if self._can_place_(stock, (x, y), prod_size):
+                                short_side_fit = min(abs(stock_w - prod_w), abs(stock_h - prod_h))
+
+                                # Choose the position with the best (smallest) short side fit
+                                if short_side_fit < best_short_side_fit:
+                                    best_short_side_fit = short_side_fit
+                                    best_stock_idx = i
+                                    best_position = (x, y)
+
+                if best_stock_idx != -1 and best_position is not None:
+                    return {
+                        "stock_idx": best_stock_idx,
+                        "size": prod_size,
+                        "position": best_position
+                    }
+
+        # If no valid placement found
+        return {"stock_idx": -1, "size": (0, 0), "position": (None, None)}
 
 
 

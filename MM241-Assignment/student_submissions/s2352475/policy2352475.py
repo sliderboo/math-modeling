@@ -16,8 +16,6 @@ class Policy2352475:
         def is_balanced_product(self):
             """Return True if the product is balanced (min(width, height)/max(width, height) > 0.8)"""
             return min(self.width, self.height) / max(self.width, self.height) > 0.8
-
-
     class Area:
         def __init__(self, x, y, width, height):
             self.x = x
@@ -76,8 +74,6 @@ class Policy2352475:
             # Sort areas by size (largest first) to promote better space utilization
             new_areas.sort(key=lambda a: a.area, reverse=True)
             return new_areas
-
-
     class Stock:
         def __init__(self, stock_id, width, height):
             self.stock_id = stock_id
@@ -152,8 +148,6 @@ class Policy2352475:
                         
                     j += 1
                 i += 1
-
-    @staticmethod
     def place_products_across_stocks(stocks, products):
         """Improved placement strategy to maximize utilization across all stocks"""
         # Sort products by area in descending order
@@ -187,103 +181,6 @@ class Policy2352475:
             if not products_to_remove:
                 print(f"Warning: Could not place {len(unplaced_products)} remaining products")
                 break
-    
-    @staticmethod
-    def evaluate_performance(stocks):
-        """
-        Evaluate and print aggregate performance metrics for all stocks.
-
-        Metrics:
-        - Maximum filled area (%)
-        - Minimum filled area (%)
-        - Trim loss: Unused area across all filled stocks (%)
-        - Unused stocks: Number of stocks with 0% filled area
-        """
-        utilized_stocks = [stock for stock in stocks if sum(product[2] * product[3] for product in stock.placed_products) > 0]
-        
-        total_area = sum(stock.width * stock.height for stock in utilized_stocks)  # Total area of utilized stocks
-        
-        # Calculate the filled areas for each utilized stock
-        filled_areas = [
-            sum(product[2] * product[3] for product in stock.placed_products)
-            for stock in utilized_stocks
-        ]
-        
-        # Calculate trim loss as the sum of unused areas in utilized stocks
-        trim_loss = sum((stock.width * stock.height - filled_area) for stock, filled_area in zip(utilized_stocks, filled_areas))
-        
-        # Calculate the filled percentages for utilized stocks
-        filled_percentages = [
-            (filled_area / (stock.width * stock.height)) * 100
-            for filled_area, stock in zip(filled_areas, utilized_stocks)
-        ]
-        
-        # Calculate the number of unused stocks (those with zero filled area)
-        unused_stock_count = len([stock for stock in stocks if sum(product[2] * product[3] for product in stock.placed_products) == 0])
-        
-        # Calculate max, min, and average filled areas
-        max_filled_area = np.amax(filled_percentages) if filled_percentages else 0
-        min_filled_area = np.amin(filled_percentages) if filled_percentages else 0
-        avg_filled_area = np.mean(filled_percentages) if filled_percentages else 0
-    
-        
-        # Calculate trim loss as a percentage
-        trim_loss_percentage = (trim_loss / total_area) * 100
-        # Output the performance metrics
-        performance_metrics = {
-        "max_filled_area": max_filled_area,
-        "min_filled_area": min_filled_area,
-        "avg_filled_area": avg_filled_area,
-        "trim_loss_percentage": trim_loss_percentage,
-        "unused_stock_count": unused_stock_count,
-        "trim_loss": trim_loss,
-        "time_to_solve": None,
-        }
-        return performance_metrics
-    
-    def aggregate_performance(self):
-        """
-        Aggregate the performance metrics from all test cases and format the output.
-
-        Args:
-        - self.performance: List of performance metrics dictionaries from all test cases.
-
-        Returns:
-        - Dictionary of aggregated and formatted metrics.
-        """
-        # Aggregate metrics across all test cases
-        aggregated = {
-            "max_filled_area": np.max([metrics["max_filled_area"] for metrics in self.performance]),
-            "min_filled_area": np.min([metrics["min_filled_area"] for metrics in self.performance]),
-            "avg_filled_area": np.mean([metrics["avg_filled_area"] for metrics in self.performance]),
-            "max_time_to_solve": np.max([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
-            "min_time_to_solve": np.min([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
-            "avg_time_to_solve": np.mean([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
-            "avg_trim_loss_percentage": np.mean([metrics["trim_loss_percentage"] for metrics in self.performance]),
-            "avg_unused_stock_count": np.mean([metrics["unused_stock_count"] for metrics in self.performance]),
-            "total_trim_loss": np.sum([metrics["trim_loss"] for metrics in self.performance]),
-            "total_unused_stocks": np.sum([metrics["unused_stock_count"] for metrics in self.performance]),
-        }
-
-        # Format the values to improve readability
-        print(f"Max Filled Area: {aggregated['max_filled_area']:.2f}%")
-        print(f"Min Filled Area: {aggregated['min_filled_area']:.2f}%")
-        print(f"Avg Filled Area: {aggregated['avg_filled_area']:.2f}%")
-        # print(f"Avg Trim Loss Percentage: {aggregated['avg_trim_loss_percentage']:.2f}%")
-        print(f"Max Time To Solve: {aggregated['max_time_to_solve']:.4f}")
-        print(f"Min Time To Solve: {aggregated['min_time_to_solve']:.4f}")
-        print(f"Avg Time To Solve: {aggregated['avg_time_to_solve']:.4f}")
-        print(f"Avg Unused Stock Count: {aggregated['avg_unused_stock_count']:.2f}%")
-        # print(f"Total Trim Loss: {aggregated['total_trim_loss']:,}")
-        # print(f"Total Unused Stocks: {aggregated['total_unused_stocks']:,}")
-
-
-        
-        
-    
-
-
-
     def get_action(self, observation, info):
         if self.it >= len(self.result):
             self.isSolved = False
@@ -335,7 +232,7 @@ class Policy2352475:
                         "size": (prod_width, prod_height), 
                         "position": (pos_x, pos_y)
                     })
-        
+    
         action = {
             "stock_idx": self.result[self.it]["stock_idx"],
             "size": self.result[self.it]["size"],
@@ -343,6 +240,93 @@ class Policy2352475:
         }
         self.it += 1
         return action
-    
+    def evaluate_performance(stocks):
+        """
+        Evaluate and print aggregate performance metrics for all stocks.
 
-          
+        Metrics:
+        - Maximum filled area (%)
+        - Minimum filled area (%)
+        - Trim loss: Unused area across all filled stocks (%)
+        - Unused stocks: Number of stocks with 0% filled area
+        """
+        utilized_stocks = [stock for stock in stocks if sum(product[2] * product[3] for product in stock.placed_products) > 0]
+        
+        total_area = sum(stock.width * stock.height for stock in utilized_stocks)  # Total area of utilized stocks
+        
+        # Calculate the filled areas for each utilized stock
+        filled_areas = [
+            sum(product[2] * product[3] for product in stock.placed_products)
+            for stock in utilized_stocks
+        ]
+        
+        # Calculate trim loss as the sum of unused areas in utilized stocks
+        trim_loss = sum((stock.width * stock.height - filled_area) for stock, filled_area in zip(utilized_stocks, filled_areas))
+        
+        # Calculate the filled percentages for utilized stocks
+        filled_percentages = [
+            (filled_area / (stock.width * stock.height)) * 100
+            for filled_area, stock in zip(filled_areas, utilized_stocks)
+        ]
+        
+        # Calculate the number of unused stocks (those with zero filled area)
+        unused_stock_count = len([stock for stock in stocks if sum(product[2] * product[3] for product in stock.placed_products) == 0])
+        
+        # Calculate max, min, and average filled areas
+        max_filled_area = np.amax(filled_percentages) if filled_percentages else 0
+        min_filled_area = np.amin(filled_percentages) if filled_percentages else 0
+        avg_filled_area = np.mean(filled_percentages) if filled_percentages else 0
+    
+        
+        # Calculate trim loss as a percentage
+        trim_loss_percentage = (trim_loss / total_area) * 100
+        # Output the performance metrics
+        performance_metrics = {
+        "max_filled_area": max_filled_area,
+        "min_filled_area": min_filled_area,
+        "avg_filled_area": avg_filled_area,
+        "trim_loss_percentage": trim_loss_percentage,
+        "unused_stock_count": unused_stock_count,
+        "trim_loss": trim_loss,
+        "time_to_solve": None,
+        }
+        return performance_metrics  
+    def aggregate_performance(self):
+        """
+        Aggregate the performance metrics from all test cases and format the output.
+
+        Args:
+        - self.performance: List of performance metrics dictionaries from all test cases.
+
+        Returns:
+        - Dictionary of aggregated and formatted metrics.
+        """
+        # Aggregate metrics across all test cases
+        aggregated = {
+            "max_filled_area": np.max([metrics["max_filled_area"] for metrics in self.performance]),
+            "min_filled_area": np.min([metrics["min_filled_area"] for metrics in self.performance]),
+            "avg_filled_area": np.mean([metrics["avg_filled_area"] for metrics in self.performance]),
+            "max_time_to_solve": np.max([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
+            "min_time_to_solve": np.min([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
+            "avg_time_to_solve": np.mean([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
+            "avg_trim_loss_percentage": np.mean([metrics["trim_loss_percentage"] for metrics in self.performance]),
+            "avg_unused_stock_count": np.mean([metrics["unused_stock_count"] for metrics in self.performance]),
+            "total_trim_loss": np.sum([metrics["trim_loss"] for metrics in self.performance]),
+            "total_unused_stocks": np.sum([metrics["unused_stock_count"] for metrics in self.performance]),
+        }
+
+        # Format the values to improve readability
+        print(f"Max Filled Area: {aggregated['max_filled_area']:.2f}%")
+        print(f"Min Filled Area: {aggregated['min_filled_area']:.2f}%")
+        print(f"Avg Filled Area: {aggregated['avg_filled_area']:.2f}%")
+        # print(f"Avg Trim Loss Percentage: {aggregated['avg_trim_loss_percentage']:.2f}%")
+        print(f"Max Time To Solve: {aggregated['max_time_to_solve']:.4f}")
+        print(f"Min Time To Solve: {aggregated['min_time_to_solve']:.4f}")
+        print(f"Avg Time To Solve: {aggregated['avg_time_to_solve']:.4f}")
+        print(f"Avg Unused Stock Count: {aggregated['avg_unused_stock_count']:.2f}%")
+        # print(f"Total Trim Loss: {aggregated['total_trim_loss']:,}")
+        # print(f"Total Unused Stocks: {aggregated['total_unused_stocks']:,}")
+
+
+        
+     

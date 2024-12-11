@@ -187,8 +187,8 @@ class CSPExactSolver:
 
 
 def generate_data(n, m):
-    stocks = [(random.randint(20, 20), random.randint(30, 30), random.randint(1, 1)) for _ in range(m)]
     prods = [(random.randint(5, 15), random.randint(5, 15), random.randint(1, 1)) for _ in range(n)]
+    stocks = [(random.randint(20, 20), random.randint(30, 30), random.randint(1, 1)) for _ in range(m)]
     return stocks, prods
 
 def read_input_file(filename, m):

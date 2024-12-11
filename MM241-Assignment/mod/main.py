@@ -1,6 +1,6 @@
 import gym_cutting_stock
 import gymnasium as gym
-from policy import GreedyPolicy, RandomPolicy, DCGPolicy, LPPolicy, CBCPolicy, GreedyPolicy2, BestFitPolicy, FirstFitPolicy, WorstFitPolicy, NextFitDecreasingPolicy, ExactLinearPolicy, BieuPolicy
+from policy import GreedyPolicy, DCGPolicy, LPPolicy, CBCPolicy, GreedyPolicy2, BestFitPolicy, FirstFitPolicy, WorstFitPolicy, NextFitDecreasingPolicy, ExactLinearPolicy, BieuPolicy, MaxRectsBSSFPolicy
 from time import sleep
 
 
@@ -25,21 +25,6 @@ def GreedyPolicyTest():
         if terminated or truncated:
             sleep(300)
             observation, info = env.reset(seed=ep)
-            ep += 1
-
-def RandomPolicyTest():
-    observation, info = env.reset(seed=42)
-
-    # Test RandomPolicy
-    rd_policy = RandomPolicy()
-    ep = 0
-    while ep < NUM_EPISODES:
-        action = rd_policy.get_action(observation, info)
-        observation, reward, terminated, truncated, info = env.step(action)
-
-        if terminated or truncated:
-            observation, info = env.reset(seed=ep)
-            print(info)
             ep += 1
 
 def DCGPolicyTest():
@@ -215,6 +200,22 @@ def BieuPolicyTest():
             observation, info = env.reset(seed=ep)
             ep += 1
 
+def MaxRectsBSSFPolicyTest():
+    observation, info = env.reset(seed=42)
+    
+    # Test GreedyPolicy
+    mr_policy = MaxRectsBSSFPolicy()
+    ep = 0
+    while ep < NUM_EPISODES:
+        action = mr_policy.get_action(observation, info)
+        print(action)
+        observation, reward, terminated, truncated, info = env.step(action) 
+
+        if terminated or truncated:
+            sleep(300)
+            observation, info = env.reset(seed=ep)
+            ep += 1
+
 if __name__ == "__main__":
 
     # greedy_test = GreedyPolicyTest()
@@ -233,7 +234,7 @@ if __name__ == "__main__":
 
     # ff_test = FirstFitPolicyTest()
 
-    wf_test = WorstFitPolicyTest()
+    # wf_test = WorstFitPolicyTest()
 
     # nfd_test = NextFitDecreasingPolicyTest()
 
@@ -241,5 +242,6 @@ if __name__ == "__main__":
 
     # bieu_test = BieuPolicyTest()
 
+    mr_test = MaxRectsBSSFPolicyTest()
 
 env.close()
