@@ -8,9 +8,9 @@ from student_submissions.s2352475.policy2352475 import Policy2352475
 # Create the environment
 env = gym.make(
     "gym_cutting_stock/CuttingStock-v0",
-    # render_mode="human",  # Comment this line to disable rendering
+    render_mode="human",  # Comment this line to disable rendering
 )
-NUM_EPISODES = 1000
+NUM_EPISODES = 1
 
 def GuillotineTest():
     observation, info = env.reset(seed=42)
@@ -44,8 +44,8 @@ def SkylineTest():
     
 if __name__ == "__main__":
     # Reset the environment
-    test = GuillotineTest()
-    #test = SkylineTest()
+    # test = GuillotineTest()
+    test = SkylineTest()
         
 env.close()
 

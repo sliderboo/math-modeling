@@ -9,6 +9,35 @@ class Policy2352237(Policy):
         self.total_prod_area = 0
         self.total_stock_area = 0
 
+    class HeightSegment:
+        def __init__(self, start_x, end_x, level):
+            self.start_x = start_x
+            self.end_x = end_x
+            self.level = level
+
+        def has_overlap(self, prod_size, position):
+            prod_start_x, prod_y = position
+            prod_width, prod_height = prod_size
+            prod_end_x = prod_start_x + prod_width
+
+            if prod_end_x <= self.start_x or prod_start_x >= self.end_x:
+                return False
+
+            if prod_y >= self.level:
+                return False
+
+            return True
+
+        def compute_gap_area(self, prod_size, position):
+            prod_start_x, prod_y = position
+            prod_width, prod_height = prod_size
+            prod_end_x = prod_start_x + prod_width
+
+            if prod_end_x <= self.start_x or prod_start_x >= self.end_x:
+                return 0
+
+            return (prod_y - self.level) * (min(prod_end_x, self.end_x) - max(prod_start_x, self.start_x))
+
     def get_action(self, observation, info):
         if info['filled_ratio'] == 0.0:
             self.initialize_height_areas(observation["stocks"])
@@ -43,40 +72,12 @@ class Policy2352237(Policy):
             self.update_height_area(prod, best_position, observation["stocks"][selected_stock], selected_stock)
             self.total_prod_area += prod["size"][0] * prod["size"][1]
 
-            return {
+            action = {
                 "stock_idx": selected_stock,
                 "size": prod["size"],
                 "position": best_position
             }
-
-    class HeightSegment:
-        def __init__(self, start_x, end_x, level):
-            self.start_x = start_x
-            self.end_x = end_x
-            self.level = level
-
-        def has_overlap(self, prod_size, position):
-            prod_start_x, prod_y = position
-            prod_width, prod_height = prod_size
-            prod_end_x = prod_start_x + prod_width
-
-            if prod_end_x <= self.start_x or prod_start_x >= self.end_x:
-                return False
-
-            if prod_y >= self.level:
-                return False
-
-            return True
-
-        def compute_gap_area(self, prod_size, position):
-            prod_start_x, prod_y = position
-            prod_width, prod_height = prod_size
-            prod_end_x = prod_start_x + prod_width
-
-            if prod_end_x <= self.start_x or prod_start_x >= self.end_x:
-                return 0
-
-            return (prod_y - self.level) * (min(prod_end_x, self.end_x) - max(prod_start_x, self.start_x))
+            return action
 
     def initialize_height_areas(self, stocks):
         self.height_areas = []
