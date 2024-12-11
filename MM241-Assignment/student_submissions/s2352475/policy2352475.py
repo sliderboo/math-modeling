@@ -1,11 +1,75 @@
 import numpy as np
 import time
-class Policy2352475:
+from policy import Policy
+class Policy2352475(Policy):
     def __init__(self):
         self.isSolved= False
         self.result=[]
         self.performance=[]
         self.it=0
+        pass
+
+    def get_action(self, observation, info):
+        if self.it >= len(self.result):
+            self.isSolved = False
+            self.it = 0
+            self.result = []
+
+        if not self.isSolved:
+            input_prods = []
+            input_stocks = []
+            products = observation["products"]
+            for prod in products:
+                if prod["quantity"] > 0:
+                    prod_size = prod["size"]
+                    prod_w, prod_h = prod_size
+                    new_product = Policy2352475.Product(prod_w, prod_h)
+                    for _ in range(prod["quantity"]):
+                        input_prods.append(new_product)
+
+            stocks = observation["stocks"]
+            def _get_stock_size_(stock):
+                stock_w = np.sum(np.any(stock != -2, axis=1))
+                stock_h = np.sum(np.any(stock != -2, axis=0))
+                return stock_w, stock_h
+
+            stock_id = 0
+            for stock in stocks:
+                stock_w, stock_h = _get_stock_size_(stock)
+                new_stock = Policy2352475.Stock(stock_id, stock_w, stock_h)
+                stock_id += 1
+                input_stocks.append(new_stock)
+            start_time = time.time()
+            Policy2352475.place_products_across_stocks(input_stocks, input_prods)
+            end_time = time.time()
+            time_to_solve = end_time - start_time
+            # Call evaluate_performance and capture the returned metrics
+            performance_metrics = Policy2352475.evaluate_performance(input_stocks)
+            if performance_metrics:
+                performance_metrics['time_to_solve'] = time_to_solve
+                self.performance.append(performance_metrics)
+
+
+            self.isSolved = True 
+            for stock_idx, stock in enumerate(input_stocks):
+                # Iterate over the placed products in the current stock
+                for product in stock.placed_products:
+                    pos_x, pos_y, prod_width, prod_height = product
+                    self.result.append({
+                        "stock_idx": stock_idx,  # Index of the current stock
+                        "size": (prod_width, prod_height), 
+                        "position": (pos_x, pos_y)
+                    })
+    
+        action = {
+            "stock_idx": self.result[self.it]["stock_idx"],
+            "size": self.result[self.it]["size"],
+            "position": self.result[self.it]["position"]
+        }
+        self.it += 1
+        return action
+    
+
     class Product:
         def __init__(self, width, height):
             self.width = width
@@ -177,65 +241,6 @@ class Policy2352475:
             if not products_to_remove:
                 print(f"Warning: Could not place {len(unplaced_products)} remaining products")
                 break
-    def get_action(self, observation, info):
-        if self.it >= len(self.result):
-            self.isSolved = False
-            self.it = 0
-            self.result = []
-
-        if not self.isSolved:
-            input_prods = []
-            input_stocks = []
-            products = observation["products"]
-            for prod in products:
-                if prod["quantity"] > 0:
-                    prod_size = prod["size"]
-                    prod_w, prod_h = prod_size
-                    new_product = Policy2352475.Product(prod_w, prod_h)
-                    for _ in range(prod["quantity"]):
-                        input_prods.append(new_product)
-
-            stocks = observation["stocks"]
-            def _get_stock_size_(stock):
-                stock_w = np.sum(np.any(stock != -2, axis=1))
-                stock_h = np.sum(np.any(stock != -2, axis=0))
-                return stock_w, stock_h
-
-            stock_id = 0
-            for stock in stocks:
-                stock_w, stock_h = _get_stock_size_(stock)
-                new_stock = Policy2352475.Stock(stock_id, stock_w, stock_h)
-                stock_id += 1
-                input_stocks.append(new_stock)
-            start_time = time.time()
-            Policy2352475.place_products_across_stocks(input_stocks, input_prods)
-            end_time = time.time()
-            time_to_solve = end_time - start_time
-            # Call evaluate_performance and capture the returned metrics
-            performance_metrics = Policy2352475.evaluate_performance(input_stocks)
-            if performance_metrics:
-                performance_metrics['time_to_solve'] = time_to_solve
-                self.performance.append(performance_metrics)
-
-
-            self.isSolved = True 
-            for stock_idx, stock in enumerate(input_stocks):
-                # Iterate over the placed products in the current stock
-                for product in stock.placed_products:
-                    pos_x, pos_y, prod_width, prod_height = product
-                    self.result.append({
-                        "stock_idx": stock_idx,  # Index of the current stock
-                        "size": (prod_width, prod_height), 
-                        "position": (pos_x, pos_y)
-                    })
-    
-        action = {
-            "stock_idx": self.result[self.it]["stock_idx"],
-            "size": self.result[self.it]["size"],
-            "position": self.result[self.it]["position"]
-        }
-        self.it += 1
-        return action
     def evaluate_performance(stocks):
         """
         Evaluate and print aggregate performance metrics for all stocks.
@@ -325,4 +330,4 @@ class Policy2352475:
 
 
         
-     
+    
