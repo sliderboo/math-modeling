@@ -40,7 +40,7 @@ def SkylineTest():
             observation, info = env.reset(seed=ep)
             #print(info)
             ep += 1
-    solution.aggregate_performance()
+    solution.evaluate_performance()
     
 if __name__ == "__main__":
     # Reset the environment
