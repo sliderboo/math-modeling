@@ -2,7 +2,7 @@ import gym_cutting_stock
 import gymnasium as gym
 from policy import GreedyPolicy
 # from student_submissions.s2210xxx.policy2352237 import Policy2352237
-from student_submissions.s2352475.policy2352475 import Solution
+from student_submissions.s2352475.policy2352475 import Policy2352475
 
 
 # Create the environment
@@ -14,7 +14,7 @@ NUM_EPISODES = 1000
 
 def GuillotineTest():
     observation, info = env.reset(seed=42)
-    solution = Solution()
+    solution = Policy2352475()
     # Prepare input data
     ep =0
     while ep < NUM_EPISODES:

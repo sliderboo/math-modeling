@@ -1,6 +1,6 @@
 import numpy as np
 import time
-class Solution:
+class Policy2352475:
     def __init__(self):
         self.isSolved= False
         self.result=[]
@@ -37,15 +37,15 @@ class Solution:
             # Calculate the two possible cuts
             if self.width > product.width and self.height > product.height:
                 # Horizontal cut
-                horizontal_right = Solution.Area(self.x + product.width, self.y, 
+                horizontal_right = Policy2352475.Area(self.x + product.width, self.y, 
                                                  self.width - product.width, self.height)
-                horizontal_top = Solution.Area(self.x, self.y + product.height,
+                horizontal_top = Policy2352475.Area(self.x, self.y + product.height,
                                                product.width, self.height - product.height)
                 
                 # Vertical cut
-                vertical_right = Solution.Area(self.x + product.width, self.y,
+                vertical_right = Policy2352475.Area(self.x + product.width, self.y,
                                                self.width - product.width, product.height)
-                vertical_top = Solution.Area(self.x, self.y + product.height,
+                vertical_top = Policy2352475.Area(self.x, self.y + product.height,
                                               self.width, self.height - product.height)
                 
                 # Choose the cut that minimizes waste
@@ -66,11 +66,11 @@ class Solution:
                         new_areas.append(vertical_top)
             elif self.width > product.width:
                 # Only horizontal cut possible
-                new_areas.append(Solution.Area(self.x + product.width, self.y,
+                new_areas.append(Policy2352475.Area(self.x + product.width, self.y,
                                                self.width - product.width, self.height))
             elif self.height > product.height:
                 # Only vertical cut possible
-                new_areas.append(Solution.Area(self.x, self.y + product.height,
+                new_areas.append(Policy2352475.Area(self.x, self.y + product.height,
                                                self.width, self.height - product.height))
             
             # Sort areas by size (largest first) to promote better space utilization
@@ -84,7 +84,7 @@ class Solution:
             self.width = width
             self.height = height
             self.area = width * height
-            self.remaining_areas = [Solution.Area(0, 0, width, height)]
+            self.remaining_areas = [Policy2352475.Area(0, 0, width, height)]
             self.placed_products = []
 
         def place_product(self, product):
@@ -135,7 +135,7 @@ class Solution:
                     # Check if areas can be merged horizontally
                     if (area1.y == area2.y and area1.height == area2.height and 
                         area1.x + area1.width == area2.x):
-                        new_area = Solution.Area(area1.x, area1.y, 
+                        new_area = Policy2352475.Area(area1.x, area1.y, 
                                                  area1.width + area2.width, area1.height)
                         self.remaining_areas.pop(j)
                         self.remaining_areas[i] = new_area
@@ -144,7 +144,7 @@ class Solution:
                     # Check if areas can be merged vertically
                     if (area1.x == area2.x and area1.width == area2.width and 
                         area1.y + area1.height == area2.y):
-                        new_area = Solution.Area(area1.x, area1.y,
+                        new_area = Policy2352475.Area(area1.x, area1.y,
                                                  area1.width, area1.height + area2.height)
                         self.remaining_areas.pop(j)
                         self.remaining_areas[i] = new_area
@@ -298,7 +298,7 @@ class Solution:
                 if prod["quantity"] > 0:
                     prod_size = prod["size"]
                     prod_w, prod_h = prod_size
-                    new_product = Solution.Product(prod_w, prod_h)
+                    new_product = Policy2352475.Product(prod_w, prod_h)
                     for _ in range(prod["quantity"]):
                         input_prods.append(new_product)
 
@@ -311,15 +311,15 @@ class Solution:
             stock_id = 0
             for stock in stocks:
                 stock_w, stock_h = _get_stock_size_(stock)
-                new_stock = Solution.Stock(stock_id, stock_w, stock_h)
+                new_stock = Policy2352475.Stock(stock_id, stock_w, stock_h)
                 stock_id += 1
                 input_stocks.append(new_stock)
             start_time = time.time()
-            Solution.place_products_across_stocks(input_stocks, input_prods)
+            Policy2352475.place_products_across_stocks(input_stocks, input_prods)
             end_time = time.time()
             time_to_solve = end_time - start_time
             # Call evaluate_performance and capture the returned metrics
-            performance_metrics = Solution.evaluate_performance(input_stocks)
+            performance_metrics = Policy2352475.evaluate_performance(input_stocks)
             if performance_metrics:
                 performance_metrics['time_to_solve'] = time_to_solve
                 self.performance.append(performance_metrics)
