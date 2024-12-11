@@ -17,7 +17,6 @@ def solve_2d_cutting_stock_skyline(rectangles, bins):
     """
     # Create a new packer instance with Skyline algorithm
     packer = newPacker(mode=PackingMode.Offline, bin_algo=PackingBin.BBF, pack_algo=SkylineBl, rotation=True)
-
     # Add the bins to the packer
     for b in bins:
         packer.add_bin(*b)
