@@ -28,10 +28,11 @@ class CSPExactSolver:
         write_input_data(self)
 
     def _get_info(self, cutted_stocks, stocks):
-        filled_ratio = np.mean(cutted_stocks).item()
+        filled_ratio = []
         trim_loss = []
 
         for i in range(len(cutted_stocks)):
+            filled_ratio.append(cutted_stocks[i])
             trim_loss.append(1 - cutted_stocks[i])
 
         return {"filled_ratio": filled_ratio, "trim_loss": trim_loss}
@@ -172,7 +173,7 @@ class CSPExactSolver:
             output_file = os.path.join(self.output_folder, "output.txt")
             with open(output_file, "w") as f:
                 f.write(f"Number of stocks used: {total_materials_used}\n")
-                f.write(f"Filled ratio: {info['filled_ratio']:.2f}\n")
+                f.write(f"Filled ratio: {', '.join(f'{ratio:.2f}' for ratio in info['filled_ratio'])}\n")
                 f.write(f"Trim loss: {', '.join(f'{loss:.2f}' for loss in info['trim_loss'])}\n")
                 f.write(f"Solve Time: {solve_time:.2f}\n")
 
@@ -186,16 +187,16 @@ class CSPExactSolver:
 
 
 def generate_data(n, m):
-    stocks = [(random.randint(20, 30), random.randint(20, 30), random.randint(1, 1)) for _ in range(m)]
-    prods = [(random.randint(5, 15), random.randint(5, 15), random.randint(1, 3)) for _ in range(n)]
+    stocks = [(random.randint(20, 20), random.randint(30, 30), random.randint(1, 1)) for _ in range(m)]
+    prods = [(random.randint(5, 15), random.randint(5, 15), random.randint(1, 1)) for _ in range(n)]
     return stocks, prods
 
-def read_input_file(filename):
+def read_input_file(filename, m):
     if not os.path.exists(filename):
         sys.exit(f"File {filename} not found.")
     with open(filename, "r") as f:
         data = eval(f.read())
-    return data["init_stocks"], data["init_prods"]
+    return data["init_stocks"][:m], data["init_prods"]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="2D Cutting Stock Problem Solver")
@@ -213,7 +214,7 @@ if __name__ == "__main__":
     if args.r and args.m and args.n:
         init_stocks, init_prods = generate_data(args.n, args.m)
     elif args.f:
-        init_stocks, init_prods = read_input_file(args.f)
+        init_stocks, init_prods = read_input_file(args.f, args.m)
     else:
         sys.exit("Invalid arguments. Use -r with -m and -n for random data or -f to specify an input file.")
 
