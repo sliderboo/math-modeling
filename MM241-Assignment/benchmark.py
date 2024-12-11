@@ -16,22 +16,18 @@ import sys
 # orr_seeds 
 random.seed(100000)
 
-NUM_EPISODES = 1600
+NUM_EPISODES = 15
 
 # CLASS CONTAINER
 POLICIES = ["None", "GuillotineCuttingWithBestFit", "SkylineBinPack"]
 
 def benchmark(myPolicy, num_iter, seed, position, queue, policy_id):
-    env = gym.make(
-        "gym_cutting_stock/CuttingStock-v0",
-        # render_mode="human",  # Uncomment this line to enable rendering
-    )
+    env = gym.make("gym_cutting_stock/CuttingStock-v0")
     fillrat = []
     trimloss = []
     sol_time = []
     
-    # pol = myPolicy(policy_id)
-    pol = myPolicy()
+    pol = myPolicy()  # Initialize the policy
     random.seed(seed)
     this_seeds = [random.randint(0, 1000000) for _ in range(num_iter)]
     
@@ -43,15 +39,15 @@ def benchmark(myPolicy, num_iter, seed, position, queue, policy_id):
             action = pol.get_action(observation, info)
             observation, reward, terminated, truncated, info = env.step(action)
         end = time.time()
+        
+        # Collect the results
         fillrat.append(info['filled_ratio'])
         trimloss.append(info['trim_loss'])
         sol_time.append(end - start)
-        
-        queue.put(1)
+        queue.put(1)  # Mark the completion of an iteration
     
     env.close()
     return fillrat, trimloss, sol_time
-
 
 def parallel_benchmark(myPolicy, total_iter, policy_id, num_processes=4):
     seeds = [random.randint(0, 1000000) for _ in range(num_processes)]
@@ -61,14 +57,17 @@ def parallel_benchmark(myPolicy, total_iter, policy_id, num_processes=4):
         queue = manager.Queue()
         pool = mp.Pool(processes=num_processes)
         
+        # Prepare arguments for each process
         args_list = [
-            (myPolicy, min(chunk_size, total_iter - i * chunk_size), seeds[i], i, queue, policy_id) 
+            (myPolicy, min(chunk_size, total_iter - i * chunk_size), seeds[i], i, queue, policy_id)
             for i in range(num_processes)
         ]
         
+        # Start parallel execution
         results = pool.starmap_async(benchmark, args_list)
-
-        with tqdm(total=total_iter, position=0) as pbar:
+        
+        # Track progress without printing from individual processes
+        with tqdm(total=total_iter, position=0, desc="Progress") as pbar:
             completed = 0
             while completed < total_iter:
                 completed += queue.get()
@@ -76,8 +75,11 @@ def parallel_benchmark(myPolicy, total_iter, policy_id, num_processes=4):
 
         pool.close()
         pool.join()
+        
+        # Gather results from all processes
         results = results.get()
     
+    # Consolidate results
     all_res, all_trim, all_times = [], [], []
     for res, trim, sol_time in results:
         all_res.extend(res)
@@ -95,20 +97,17 @@ def performance_comparison(Policy_a, Policy_b):
     return avg
 
 if __name__ == "__main__":
-    """
-    Policy Benchmarking software, computer specifications:
-    CPU: Ryzen 7 8845HS (8 cores, 16 threads)
-    RAM: 32 GB
-    """
-    # os.system("cls")
-    sys.stdout.flush()
-    
+    sys.stdout.flush()  # Ensure immediate flushing of stdout
     global policy_id
-    policy_id = int(sys.argv[1])
+    policy_id = int(sys.argv[1])  # Get policy ID from command line
 
+    # Call parallel benchmark and get results
     all_res, all_trim, all_times = parallel_benchmark(Policy2352475, NUM_EPISODES, policy_id, 8)
-    # all_res, all_times = parallel_benchmark(Policy2352475, NUM_EPISODES, 1025)
+
+    # Clear terminal screen (optional)
     os.system("cls")
+    
+    # Print the final performance evaluation result only once after completion
     print('\n\n\n\n===== Performance evaluation result =====')
     print(f'class: {POLICIES[policy_id]}\n')
     print('Fill ratio')

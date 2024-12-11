@@ -1,12 +1,10 @@
-import random
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import numpy as np
-from collections import deque
+import time
 class Solution:
     def __init__(self):
         self.isSolved= False
         self.result=[]
+        self.performance=[]
         self.it=0
     class Product:
         def __init__(self, width, height):
@@ -231,23 +229,67 @@ class Solution:
         
         # Calculate trim loss as a percentage
         trim_loss_percentage = (trim_loss / total_area) * 100
-        
         # Output the performance metrics
-        print("===== Performance Evaluation =====")
-        print(f"Maximum filled area: {max_filled_area:.2f}%")
-        print(f"Minimum filled area: {min_filled_area:.2f}%")
-        print(f"Average filled area: {avg_filled_area:.2f}%")
-        print(f"Trim loss (unused area): {trim_loss_percentage:.2f}%")
-        print(f"Unused stocks: {unused_stock_count}/{len(stocks)}")
+        performance_metrics = {
+        "max_filled_area": max_filled_area,
+        "min_filled_area": min_filled_area,
+        "avg_filled_area": avg_filled_area,
+        "trim_loss_percentage": trim_loss_percentage,
+        "unused_stock_count": unused_stock_count,
+        "trim_loss": trim_loss,
+        "time_to_solve": None,
+        }
+        return performance_metrics
+    
+    def aggregate_performance(self):
+        """
+        Aggregate the performance metrics from all test cases and format the output.
+
+        Args:
+        - self.performance: List of performance metrics dictionaries from all test cases.
+
+        Returns:
+        - Dictionary of aggregated and formatted metrics.
+        """
+        # Aggregate metrics across all test cases
+        aggregated = {
+            "max_filled_area": np.max([metrics["max_filled_area"] for metrics in self.performance]),
+            "min_filled_area": np.min([metrics["min_filled_area"] for metrics in self.performance]),
+            "avg_filled_area": np.mean([metrics["avg_filled_area"] for metrics in self.performance]),
+            "max_time_to_solve": np.max([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
+            "min_time_to_solve": np.min([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
+            "avg_time_to_solve": np.mean([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
+            "avg_trim_loss_percentage": np.mean([metrics["trim_loss_percentage"] for metrics in self.performance]),
+            "avg_unused_stock_count": np.mean([metrics["unused_stock_count"] for metrics in self.performance]),
+            "total_trim_loss": np.sum([metrics["trim_loss"] for metrics in self.performance]),
+            "total_unused_stocks": np.sum([metrics["unused_stock_count"] for metrics in self.performance]),
+        }
+
+        # Format the values to improve readability
+        print(f"Max Filled Area: {aggregated['max_filled_area']:.2f}%")
+        print(f"Min Filled Area: {aggregated['min_filled_area']:.2f}%")
+        print(f"Avg Filled Area: {aggregated['avg_filled_area']:.2f}%")
+        # print(f"Avg Trim Loss Percentage: {aggregated['avg_trim_loss_percentage']:.2f}%")
+        print(f"Max Time To Solve: {aggregated['max_time_to_solve']:.4f}")
+        print(f"Min Time To Solve: {aggregated['min_time_to_solve']:.4f}")
+        print(f"Avg Time To Solve: {aggregated['avg_time_to_solve']:.4f}")
+        print(f"Avg Unused Stock Count: {aggregated['avg_unused_stock_count']:.2f}%")
+        # print(f"Total Trim Loss: {aggregated['total_trim_loss']:,}")
+        # print(f"Total Unused Stocks: {aggregated['total_unused_stocks']:,}")
+
+
+        
+        
+    
 
 
 
-    def get_action(self,observation,info):
-        # Place products across stocks
+    def get_action(self, observation, info):
         if self.it >= len(self.result):
-            self.isSolved=False
-            self.it=0
-            self.result=[]
+            self.isSolved = False
+            self.it = 0
+            self.result = []
+
         if not self.isSolved:
             input_prods = []
             input_stocks = []
@@ -272,9 +314,18 @@ class Solution:
                 new_stock = Solution.Stock(stock_id, stock_w, stock_h)
                 stock_id += 1
                 input_stocks.append(new_stock)
+            start_time = time.time()
             Solution.place_products_across_stocks(input_stocks, input_prods)
-            Solution.evaluate_performance(input_stocks)
-            self.isSolved=True 
+            end_time = time.time()
+            time_to_solve = end_time - start_time
+            # Call evaluate_performance and capture the returned metrics
+            performance_metrics = Solution.evaluate_performance(input_stocks)
+            if performance_metrics:
+                performance_metrics['time_to_solve'] = time_to_solve
+                self.performance.append(performance_metrics)
+
+
+            self.isSolved = True 
             for stock_idx, stock in enumerate(input_stocks):
                 # Iterate over the placed products in the current stock
                 for product in stock.placed_products:
@@ -284,11 +335,14 @@ class Solution:
                         "size": (prod_width, prod_height), 
                         "position": (pos_x, pos_y)
                     })
+        
         action = {
             "stock_idx": self.result[self.it]["stock_idx"],
             "size": self.result[self.it]["size"],
             "position": self.result[self.it]["position"]
         }
-        self.it+=1
+        self.it += 1
         return action
+    
+
           
