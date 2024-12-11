@@ -176,7 +176,6 @@ class Solution:
             # Try to place products in the most empty stock
             current_stock = stock_utilizations[0][0]
             products_to_remove = []
-            
             # Try to fill current stock with remaining products
             for product in unplaced_products:
                 if current_stock.place_product(product):
@@ -185,18 +184,64 @@ class Solution:
             # Remove placed products from unplaced list
             for product in products_to_remove:
                 unplaced_products.remove(product)
-                
+            
             # If we couldn't place any products in this iteration, break to avoid infinite loop
             if not products_to_remove:
                 print(f"Warning: Could not place {len(unplaced_products)} remaining products")
                 break
-            total_area = current_stock.width * current_stock.height
-            if total_area > 0:
-                filled_area = sum([p[2] * p[3] for p in current_stock.placed_products])
-                filled_percentage = (filled_area / total_area) * 100
-                print(f"Stock {current_stock.stock_id}: Filled area = {filled_percentage:.2f}%")
-            else:
-                print(f"Stock {current_stock.stock_id}: Invalid total area (0), cannot evaluate performance.")
+    
+    @staticmethod
+    def evaluate_performance(stocks):
+        """
+        Evaluate and print aggregate performance metrics for all stocks.
+
+        Metrics:
+        - Maximum filled area (%)
+        - Minimum filled area (%)
+        - Trim loss: Unused area across all filled stocks (%)
+        - Unused stocks: Number of stocks with 0% filled area
+        """
+        utilized_stocks = [stock for stock in stocks if sum(product[2] * product[3] for product in stock.placed_products) > 0]
+        
+        total_area = sum(stock.width * stock.height for stock in utilized_stocks)  # Total area of utilized stocks
+        
+        # Calculate the filled areas for each utilized stock
+        filled_areas = [
+            sum(product[2] * product[3] for product in stock.placed_products)
+            for stock in utilized_stocks
+        ]
+        
+        # Calculate trim loss as the sum of unused areas in utilized stocks
+        trim_loss = sum((stock.width * stock.height - filled_area) for stock, filled_area in zip(utilized_stocks, filled_areas))
+        
+        # Calculate the filled percentages for utilized stocks
+        filled_percentages = [
+            (filled_area / (stock.width * stock.height)) * 100
+            for filled_area, stock in zip(filled_areas, utilized_stocks)
+        ]
+        
+        # Calculate the number of unused stocks (those with zero filled area)
+        unused_stock_count = len([stock for stock in stocks if sum(product[2] * product[3] for product in stock.placed_products) == 0])
+        
+        # Calculate max, min, and average filled areas
+        max_filled_area = np.amax(filled_percentages) if filled_percentages else 0
+        min_filled_area = np.amin(filled_percentages) if filled_percentages else 0
+        avg_filled_area = np.mean(filled_percentages) if filled_percentages else 0
+    
+        
+        # Calculate trim loss as a percentage
+        trim_loss_percentage = (trim_loss / total_area) * 100
+        
+        # Output the performance metrics
+        print("===== Performance Evaluation =====")
+        print(f"Maximum filled area: {max_filled_area:.2f}%")
+        print(f"Minimum filled area: {min_filled_area:.2f}%")
+        print(f"Average filled area: {avg_filled_area:.2f}%")
+        print(f"Trim loss (unused area): {trim_loss_percentage:.2f}%")
+        print(f"Unused stocks: {unused_stock_count}/{len(stocks)}")
+
+
+
     def get_action(self,observation,info):
         # Place products across stocks
         if self.it >= len(self.result):
@@ -228,6 +273,7 @@ class Solution:
                 stock_id += 1
                 input_stocks.append(new_stock)
             Solution.place_products_across_stocks(input_stocks, input_prods)
+            Solution.evaluate_performance(input_stocks)
             self.isSolved=True 
             for stock_idx, stock in enumerate(input_stocks):
                 # Iterate over the placed products in the current stock

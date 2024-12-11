@@ -199,7 +199,7 @@ def place_products_across_stocks(stocks, products):
         current_stock = stock_utilizations[0][0]
         products_to_remove = []
         
-        # Try to fill current stock with remaining products
+        # Try to fill current stock with    remaining products
         for product in unplaced_products:
             if current_stock.place_product(product):
                 products_to_remove.append(product)
@@ -215,8 +215,8 @@ def place_products_across_stocks(stocks, products):
             
         # Evaluate performance for the current stock
         evaluate_performance(current_stock)
-        #print(current_stock.placed_products)
-        #visualize_stock(current_stock)
+        print(current_stock.placed_products)
+        visualize_stock(current_stock)
 
 
 def generate_random_color():
@@ -262,64 +262,11 @@ def evaluate_performance(stock):
 
 # Example Usage
 if __name__ == "__main__":
-    # Initialize the environment
-    env = gym.make(
-        "gym_cutting_stock/CuttingStock-v0",
-        render_mode="human",  # Comment this line to disable rendering
-    )
-    observation, info = env.reset(seed=42)
 
     # Prepare input data
     input_prods = []
     input_stocks = []
-
-    products = observation["products"]
-    for prod in products:
-        if prod["quantity"] > 0:
-            prod_size = prod["size"]
-            prod_w, prod_h = prod_size
-            new_product = Product(prod_w, prod_h)
-            for _ in range(prod["quantity"]):
-                input_prods.append(new_product)
-
-    stocks = observation["stocks"]
-    def _get_stock_size_(stock):
-        stock_w = np.sum(np.any(stock != -2, axis=1))
-        stock_h = np.sum(np.any(stock != -2, axis=0))
-        return stock_w, stock_h
-
-    stock_id = 0
-    for stock in stocks:
-        stock_w, stock_h = _get_stock_size_(stock)
-        new_stock = Stock(stock_id, stock_w, stock_h)
-        stock_id += 1
-        input_stocks.append(new_stock)
-
-    # Place products across stocks
     place_products_across_stocks(input_stocks, input_prods)
 
-    result = []
-    for stock_idx, stock in enumerate(input_stocks):
-        # Iterate over the placed products in the current stock
-        for product in stock.placed_products:
-            pos_x, pos_y, prod_width, prod_height = product
-            result.append({
-                "stock_idx": stock_idx,  # Index of the current stock
-                "size": (prod_width, prod_height), 
-                "position": (pos_x, pos_y)
-            })
-
-    # Now interact with the environment for each product placement
-    for placement in result:
-        # Define action format based on how the environment expects the input
-        action = {
-            "stock_idx": placement["stock_idx"],
-            "size": placement["size"],
-            "position": placement["position"]
-        }
-        print(action)
-        # Perform the step with the action
-        observation, reward, done, truncated, info = env.step(action)
-        print(f"Step result: {observation}, Reward: {reward}")
 
     
