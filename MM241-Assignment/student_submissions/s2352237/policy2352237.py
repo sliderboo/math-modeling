@@ -1,9 +1,8 @@
 from policy import Policy
-import numpy as np
+
 
 class Policy2352237(Policy):
     def __init__(self):
-        self.result= {}
         self.height_areas = []
         self.current_stock = 0
         self.stock_inventory = []
