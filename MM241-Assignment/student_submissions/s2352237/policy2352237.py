@@ -12,17 +12,17 @@ class Policy2352237(Policy):
     def get_action(self, observation, info):
         if info['filled_ratio'] == 0.0:
             self.initialize_height_areas(observation["stocks"])
-
-        prods = sorted(observation["products"], key=lambda p: -(p["size"][0] * p["size"][1]))
+        prods = observation["products"]
+        prods = sorted(prods, key=lambda p: (p["size"][0] * p["size"][1]), reverse=True)
 
         for prod in prods:
             if prod["quantity"] == 0:
                 continue
 
-            prod_size = sorted(prod["size"], reverse=True)
+            
             min_waste, best_position, selected_stock, rotate = float('inf'), (-1, -1), -1, False
 
-            for i, (stock, stock_idx) in enumerate(self.stock_inventory[:self.current_stock]):
+            for i,(stock, stock_idx) in enumerate(self.stock_inventory[:self.current_stock]):
                 waste, position, should_rotate = self.best_placement(prod, stock, stock_idx)
                 if waste < min_waste:
                     min_waste, best_position, selected_stock, rotate = waste, position, stock_idx, should_rotate

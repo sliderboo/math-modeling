@@ -17,7 +17,7 @@ import sys
 # orr_seeds 
 random.seed(100000)
 
-NUM_EPISODES = 2048
+NUM_EPISODES = 100
 
 # CLASS CONTAINER
 POLICIES = ["None", "GuillotineCuttingWithBestFit", "SkylineBinPack"]
@@ -102,7 +102,6 @@ if __name__ == "__main__":
     sys.stdout.flush()  # Ensure immediate flushing of stdout
     global policy_id
     policy_id = int(sys.argv[1])  # Get policy ID from command line
-
     # Call parallel benchmark and get results
     all_res, all_trim, all_times = parallel_benchmark(Policy2352475, NUM_EPISODES, policy_id, 16)
 

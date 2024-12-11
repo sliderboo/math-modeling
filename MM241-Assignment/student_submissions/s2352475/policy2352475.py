@@ -39,6 +39,7 @@ class Policy2352475(Policy):
                 new_stock = Policy2352475.Stock(stock_id, stock_w, stock_h)
                 stock_id += 1
                 input_stocks.append(new_stock)
+
             start_time = time.time()
             Policy2352475.place_products_across_stocks(input_stocks, input_prods)
             end_time = time.time()
@@ -212,6 +213,7 @@ class Policy2352475(Policy):
         """Improved placement strategy to maximize utilization across all stocks"""
         # Sort products by area in descending order
         products = sorted(products, key=lambda p: p.area, reverse=True)
+        stocks = sorted(stocks, key=lambda p: p.area, reverse=True)
         unplaced_products = products.copy()
         
         while unplaced_products:
