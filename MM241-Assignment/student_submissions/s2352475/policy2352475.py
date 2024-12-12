@@ -294,9 +294,9 @@ class Policy2352475(Policy):
         "time_to_solve": None,
         }
         return performance_metrics  
-    def aggregate_performance(self):
+    def print_performance(self):
         """
-        Aggregate the performance metrics from all test cases and format the output.
+        Print the performance metrics from all test cases and format the output.
 
         Args:
         - self.performance: List of performance metrics dictionaries from all test cases.
@@ -316,6 +316,7 @@ class Policy2352475(Policy):
             "avg_unused_stock_count": np.mean([metrics["unused_stock_count"] for metrics in self.performance]),
             "total_trim_loss": np.sum([metrics["trim_loss"] for metrics in self.performance]),
             "total_unused_stocks": np.sum([metrics["unused_stock_count"] for metrics in self.performance]),
+            # "total_use_stock": len(self.performance)
         }
 
         # Format the values to improve readability
@@ -326,9 +327,11 @@ class Policy2352475(Policy):
         print(f"Max Time To Solve: {aggregated['max_time_to_solve']:.4f}")
         print(f"Min Time To Solve: {aggregated['min_time_to_solve']:.4f}")
         print(f"Avg Time To Solve: {aggregated['avg_time_to_solve']:.4f}")
-        print(f"Avg Unused Stock Count: {aggregated['avg_unused_stock_count']:.2f}%")
+        # print(f"Avg Unused Stock Count: {aggregated['avg_unused_stock_count']:.2f}%")
         # print(f"Total Trim Loss: {aggregated['total_trim_loss']:,}")
-        # print(f"Total Unused Stocks: {aggregated['total_unused_stocks']:,}")
+        print(f"Total Unused Stocks: {aggregated['total_unused_stocks']:,}")
+        # print(f"Total Used Stock: {aggregated['total_use_stock']:,}")
+
 
 
         

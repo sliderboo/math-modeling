@@ -54,16 +54,20 @@ class Policy2352237(Policy):
             # print(str(self.result))
             return action
 
-    def evaluate_performance(self):
+    def print_performance(self):
         filled_rat =[]
         for key in self.result:
             filled=self.result[key]*100 / (key[1][0]*key[1][1])
+            if filled > 100:
+                filled = 100
             filled_rat.append(filled)
+                
         aggregated = {
             "max_filled_area": np.max(filled_rat),
             "min_filled_area": np.min(filled_rat),
             "avg_filled_area": np.mean(filled_rat),
             "total_use_stock": len(filled_rat),
+            "total_unused_stock": len(self.stock_inventory) - len(filled_rat),
             # "avg_filled_area": np.mean([metrics["avg_filled_area"] for metrics in self.performance]),
             # "max_time_to_solve": np.max([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
             # "min_time_to_solve": np.min([metrics["time_to_solve"] for metrics in self.performance]),  # Fix generator issue
@@ -77,7 +81,8 @@ class Policy2352237(Policy):
         print(f"Min Filled Area: {aggregated['min_filled_area']:.2f}%")
         print(f"Avg Filled Area: {aggregated['avg_filled_area']:.2f}%")
         # print(f"Avg Trim Loss Percentage: {aggregated['avg_trim_loss_percentage']:.2f}%")
-        print(f"Total Used Stock Count: {aggregated['total_use_stock']:.2f}")
+        print(f"Total Used Stock: {aggregated['total_use_stock']:.2f}")
+        # print(f"Total Unused Stock: {aggregated['total_unused_stock']:.2f}")
             
     
         
