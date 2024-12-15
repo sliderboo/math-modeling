@@ -10,7 +10,7 @@ import time
 env = gym.make(
     "gym_cutting_stock/CuttingStock-v0",
     # render_mode = "rgb_array",
-    render_mode="human",  # Comment this line to disable rendering
+    # render_mode="human",  # Comment this line to disable rendering
 )
 NUM_EPISODES = 10
 
@@ -60,7 +60,7 @@ def MergeTest():
     # Reset the environment
     observation, info = env.reset(seed=42)
 
-    policy2352216_2352237_2352334_2352475 = Policy2352216_2352237_2352334_2352475(policy_id=1)
+    policy2352216_2352237_2352334_2352475 = Policy2352216_2352237_2352334_2352475(policy_id=2)
     for _ in range(200):
         action = policy2352216_2352237_2352334_2352475.get_action(observation, info)
         observation, reward, terminated, truncated, info = env.step(action)
@@ -72,8 +72,8 @@ def MergeTest():
 if __name__ == "__main__":
     # Reset the environment
     # test = GuillotineTest()
-    # test = SkylineTest()
-    test = MergeTest()
+    test = SkylineTest()
+    # test = MergeTest()
         
 env.close()
 
